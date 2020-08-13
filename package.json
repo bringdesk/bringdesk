@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "dateformat": "^3.0.3",
+    "input-event": "^1.2.6",
+    "log4js": "^5.3.0",
+    "parse-color": "^1.0.0",
+    "yaml": "^1.7.2"
+  }
+}
