@@ -1,4 +1,11 @@
 {
+  "name": "bringdesk",
+  "version": "1.0.0",
+  "scripts": {
+    "check": "node --experimental-specifier-resolution=node 001_warn.mjs"
+  },
+  "author": "Vitold Sedyshev",
+  "license": "proprietary",
   "dependencies": {
     "dateformat": "^3.0.3",
     "input-event": "^1.2.6",
