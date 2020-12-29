@@ -6,15 +6,15 @@ class WeatherWidget {
     constructor(options) {
         this.options = options;
         this.weatherUpdateInterval = 5 * 1000;
-        this.weather = null;
+        this.weather = {};
         this.images = {};
     }
 
     setup() {
         this.LoadFont({
             name: 'WeatherFont',
-            path: '...',
-            size: 24,
+            path: 'Helvetica',
+            size: 48,
         });
         this.images = {
             Cloud: this.parent.LoadImage('./res/weather/04n.png'),
@@ -87,42 +87,30 @@ class WeatherWidget {
         // this.weatherTimer
     }
 
-
-    renderImage(options) {
-        screen.DrawImage(, position.left + 16, position.top + 16);
-    }
-
-    renderInfo(options) {
-        const screen = options.screen;
-        const position = options.position;
-        //
-        screen.SelectFontFace("Helvetica")
-        screen.SetFontSize(48.0)
-        screen.SetColor(1.0, 1.0, 1.0, 1.0);
-        //
-        const weather = this.searchWeather();
-        //
-        if (weather === null) {
-            screen.MoveTo(position.left + 64, position.top + 1 * 48);
-            screen.DrawText("Update error.");
-        } else {
-            screen.MoveTo(position.left + 64, position.top + 1 * 48);
-            const line1 = String(weather.name);
-            screen.DrawText(line1);
-            //
-            screen.MoveTo(position.left + 64, position.top + 2 * 48);
-            const line2 = `${weather.temp} C`;
-            screen.DrawText(line2);
-            //
-            screen.MoveTo(position.left + 64, position.top + 3 * 48);
-            const line3 = String(weather.description);
-            screen.DrawText(line3);
-        }
-    }
-
     render(parent) {
-        this.renderImage(options);
-        this.renderInfo(options);
+
+        if (this.weather) {
+
+            const {
+                temp = 0,
+                name = 'Неизвестно',
+                description = 'Идет загрузка данных ...',
+            } = this.weather;
+
+            /* Рисуем небольшое изображение для прогноза погоды (иконку) */
+            //screen.DrawImage(, position.left + 16, position.top + 16);
+
+            /* Рисуем сам прогноз погоды */
+            parent.DrawText({
+                font: 'WeatherFont',
+                text: `${name} ... ${temp} ... ${description}`,
+                x: 100,
+                y: 100,
+                color: [255,255,255],
+            });
+
+        }
+
     }
 
 }
