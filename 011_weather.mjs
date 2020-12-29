@@ -1,8 +1,7 @@
 
 import {BringDesk} from './lib';
 
-//import {WeatherWidget} from './widgets/WeatherWidget';
-
+import {WeatherWidget} from './widgets';
 
 class Application extends BringDesk {
 

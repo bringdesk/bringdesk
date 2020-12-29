@@ -1,21 +1,64 @@
 
-const https = require('https');
+import https from 'https';
 
 class WeatherWidget {
 
     constructor(options) {
-        this._options = options;
-        this.weatherUpdateInterval = 5 * 60 * 1000.0;
+        this.options = options;
+        this.weatherUpdateInterval = 5 * 1000;
         this.weather = null;
+        this.images = {};
     }
 
-    processWeather(rawData) {
-        console.log(rawData);
-        this.weather = JSON.parse(rawData);
+    setup() {
+        this.LoadFont({
+            name: 'WeatherFont',
+            path: '...',
+            size: 24,
+        });
+        this.images = {
+            Cloud: this.parent.LoadImage('./res/weather/04n.png'),
+        };
+    }
+
+    processResponse(rawData) {
+        try {
+            const data = JSON.parse(rawData);
+            this.weather = this.processWeather(data);
+        } catch (err) {
+            console.log(`Error process response: err = ${err}`);
+        }
+    }
+
+    processWeather(data) {
+        const result = {};
+        try {
+            const weathers = data.weather;
+            const weather = weathers[0];
+            const description = weather.description;
+            const main = data.main;
+            const name = data.name;
+            result.temp = main.temp;
+            result.name = name;
+            result.description = description;
+        } catch(err) {
+            console.log(`Error process weather data: err = ${err}`);
+        }
+        return result;
     }
 
     updateWeather() {
-        const url = "https://api.openweathermap.org/data/2.5/weather?id=498817&lang=ru&units=metric&appid=62a65b29ff2592740c31b0022281cc33";
+        const {
+            host = 'api.openweathermap.org',
+            path = '/data/2.5/weather',
+            query = {
+                id: 498817,
+                lang: 'ru',
+                units: 'metric',
+                appid: '62a65b29ff2592740c31b0022281cc33'
+            }
+        } = this.options;
+        const url = '...';
         const request = https.get(url, (res) => {
             res.setEncoding('utf8');
             let rawData = '';
@@ -35,41 +78,18 @@ class WeatherWidget {
         setImmediate(() => {
             this.updateWeather();
         });
-        setInterval(() => {
+        this.weatherTimer = setInterval(() => {
             this.updateWeather();
         }, this.weatherUpdateInterval);
     }
 
     stop() {
+        // this.weatherTimer
     }
 
-    searchWeather() {
-        let result = null;
-        try {
-            const weathers = this.weather.weather;
-            const weather = weathers[0];
-            const description = weather.description;
-            const main = this.weather.main;
-            const name = this.weather.name;
-            result = {
-                temp: main.temp,
-                name: name,
-                description: description,
-            };
-        } catch(err) {
-            console.log(err);
-        }
-        return result;
-    }
 
     renderImage(options) {
-        const screen = options.screen;
-        const position = options.position;
-        //
-        screen.DrawImage("./res/weather/04n.png", position.left + 16, position.top + 16);
-    }
-
-    renderError(options) {
+        screen.DrawImage(, position.left + 16, position.top + 16);
     }
 
     renderInfo(options) {
@@ -100,26 +120,7 @@ class WeatherWidget {
         }
     }
 
-    mergeOptions(mainOptions, currentOptions) {
-        const options = {};
-        /* Overlay current options */
-        Object.keys(currentOptions).forEach((key) => {
-            const value = currentOptions[key];
-            options[key] = value;
-        });
-        /* Overlay main options */
-        Object.keys(mainOptions).forEach((key) => {
-            const value = mainOptions[key];
-            options[key] = value;
-        });
-        /* Done */
-        return options;
-    }
-
-    render(options1) {
-        const options = this.mergeOptions(this._options, options1);
-        const screen = options.screen;
-        /* Draw information */
+    render(parent) {
         this.renderImage(options);
         this.renderInfo(options);
     }

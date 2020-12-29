@@ -1,5 +1,5 @@
 
-const https = require('https');
+import https from 'https';
 
 class MoneyWidget {
 

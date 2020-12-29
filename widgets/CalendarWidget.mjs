@@ -1,5 +1,6 @@
 
-const dateFormat = require('dateformat');
+import dateFormat from 'dateformat';
+
 dateFormat.i18n = {
     dayNames: [
         'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',

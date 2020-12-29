@@ -1,5 +1,5 @@
 
-var parse = require('parse-color');
+import parse from 'parse-color';
 
 class BoxWidget {
 
