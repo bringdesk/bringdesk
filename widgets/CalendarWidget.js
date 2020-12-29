@@ -109,6 +109,6 @@ class CalendarWidget {
 
 }
 
-module.exports = {
+export {
     CalendarWidget
 }

@@ -3,59 +3,51 @@ import {BringDesk} from './lib';
 
 class Application extends BringDesk {
 
-    renderCenterText(posY, msg) {
-        const width = this.scr1.width;
-        const height = this.scr1.height;
-//      const window = this.scr1.GetTextResolution(msg);
-        const window = {
-            width: 1260,
-            height: 75,
-        };
-        const posX = (width - window.width) / 2.0;
-        this.scr1.MoveTo(posX, posY);
-        this.scr1.DrawText(msg);
-    }
+    setup() {
 
-    GetViewport() {
-        return [ 0, 0 ];
+        /* Регистрируем шрифт с именем "FreeSans" для написания обьявления */
+        this.LoadFont({
+            name: 'FreeSans',
+            path: './res/font/FreeSans.ttf',
+            size: 36,
+        });
+
     }
 
     render() {
 
-        /* Get viewport */
+        /* Получаем разрешение поверхности экрана */
         const [ w, h ] = this.GetViewport();
 
-        /* Clear screen */
-        this.Clear();
+        /* Очищаем изображение (смысла в этом без изменений нет, но тут сделано для примера) */
+//        this.Clear();
 
-        /* Draw background */
-//        this.scr1.SetColor(1.0, 0.0, 0.0, 1.0);
-//        this.scr1.DrawRectangle(0, 0, width, height);
+        /* Закрашиваем красный фон */
+        this.FillRect([0, 0, w, h], [255, 0, 0]);
 
-        /* Calculate text window */
-//        const window = {}
-//        window.top = 0 || 300;
-//        const singleLinePadding = 25
-//        const singleLineHeight = 75
+        /* Выводим строки текста (сложный способ с вычислением координат текста) */
+        const lines = [
+            'ВНИМАНИЕ !',
+            'Сохраняйте спокойствие.',
+            'Всем срочно покинуть территорию Арены.',
+            'Следуйте планам эвакуации !',
+        ];
+        let posX = 120;
+        let posY = 300;
+        lines.forEach((line) => {
+            this.DrawText({
+                name: 'FreeSans',
+                text: line,
+                color: [255, 255, 255],
+                x: posX,
+                y: posY,
+            });
+            posY += 80;
+        });
 
-        /* Draw message */
-//        this.renderCenterText(window.top + 1 * singleLinePadding + 0 * singleLineHeight, 'ВНИМАНИЕ !')
-//        this.renderCenterText(window.top + 2 * singleLinePadding + 1 * singleLineHeight, 'Сохраняйте спокойствие.')
-//        this.renderCenterText(window.top + 3 * singleLinePadding + 2 * singleLineHeight, 'Всем срочно покинуть территорию Арены.')
-//        this.renderCenterText(window.top + 4 * singleLinePadding + 3 * singleLineHeight, 'Следуйте планам эвакуации !')
-
-        //Update screen
+        /* Обновим изображение на экране */
         this.RenderPresent();
 
-    }
-
-    setup() {
-        /* Preload fonts */
-        this.LoadFont({
-            name: 'FreeSans',
-            path: './res/font/FreeSans.ttf',
-            size: 24,
-        });
     }
 
 }

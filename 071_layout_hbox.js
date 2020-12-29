@@ -7,7 +7,7 @@ const hbox = require('./widgets/layout/HBoxLayoutWidget');
 const calendar = require('./widgets/CalendarWidget');
 const money = require('./widgets/MoneyWidget');
 
-class Application {
+class Application extends BringDesk {
 
     constructor() {
         const options = {

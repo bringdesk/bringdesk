@@ -126,6 +126,6 @@ class WeatherWidget {
 
 }
 
-module.exports = {
+export {
     WeatherWidget
 }

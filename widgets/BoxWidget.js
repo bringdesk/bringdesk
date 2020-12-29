@@ -70,6 +70,6 @@ class BoxWidget {
 
 }
 
-module.exports = {
+export {
     BoxWidget
 }

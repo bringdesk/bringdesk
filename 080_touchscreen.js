@@ -9,7 +9,7 @@ const screen = require('./bringdesk_screen/build/Release/screen.node');
 const STATE_CALIBRATION = 1;
 const STATE_PRODUCTION = 2;
 
-class Application {
+class Application extends BringDesk {
 
     constructor() {
         const options = {

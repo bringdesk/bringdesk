@@ -6,7 +6,7 @@ const screen = require('./bringdesk_screen/build/Release/screen.node');
 const calendar = require('./widgets/CalendarWidget');
 const box = require('./widgets/basic/BoxWidget');
 
-class Application {
+class Application extends BringDesk {
 
     constructor() {
         const options = {

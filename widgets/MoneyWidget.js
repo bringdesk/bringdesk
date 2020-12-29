@@ -102,6 +102,6 @@ class MoneyWidget {
 
 }
 
-module.exports = {
+export {
     MoneyWidget
 }

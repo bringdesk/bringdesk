@@ -12,7 +12,7 @@ const calendar = require('./widgets/CalendarWidget');
 const money = require('./widgets/MoneyWidget');
 const weather = require('./widgets/WeatherWidget');
 
-class Application {
+class Application extends BringDesk {
 
     constructor() {
         const options = {
