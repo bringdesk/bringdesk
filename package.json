@@ -2,7 +2,7 @@
   "name": "bringdesk",
   "version": "1.0.0",
   "scripts": {
-    "check": "node --experimental-specifier-resolution=node 010_box.mjs"
+    "check": "node --experimental-specifier-resolution=node 011_weather.mjs"
   },
   "author": "Vitold Sedyshev",
   "license": "proprietary",

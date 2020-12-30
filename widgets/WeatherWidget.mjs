@@ -10,15 +10,30 @@ class WeatherWidget {
         this.images = {};
     }
 
-    setup() {
-        this.LoadFont({
+    startUpdate() {
+        setImmediate(() => {
+            this.updateWeather();
+        });
+        this.weatherTimer = setInterval(() => {
+            this.updateWeather();
+        }, this.weatherUpdateInterval);
+    }
+    stopUpdate() {
+    }
+
+    setup(parent) {
+        /* Загружаем шрифт для использования в компоненте прогноза погоды */
+        parent.LoadFont({
             name: 'WeatherFont',
-            path: 'Helvetica',
+            path: './res/font/FreeSans.ttf',
             size: 48,
         });
+        /* Загружаем изображения */
         this.images = {
-            Cloud: this.parent.LoadImage('./res/weather/04n.png'),
+            Cloud: parent.LoadImage('./res/weather/04n.png'),
         };
+        /* Стартуем рутину обновления данных о прогнозе погоды */
+        this.startUpdate();
     }
 
     processResponse(rawData) {
@@ -48,18 +63,15 @@ class WeatherWidget {
     }
 
     updateWeather() {
-        const {
-            host = 'api.openweathermap.org',
-            path = '/data/2.5/weather',
-            query = {
-                id: 498817,
-                lang: 'ru',
-                units: 'metric',
-                appid: '62a65b29ff2592740c31b0022281cc33'
-            }
-        } = this.options;
-        const url = '...';
-        const request = https.get(url, (res) => {
+        const address = new URL('https://api.openweathermap.org/data/2.5/weather');
+        address.searchParams = {
+            id: 498817,
+            lang: 'ru',
+            units: 'metric',
+            appid: '62a65b29ff2592740c31b0022281cc33'
+        };
+        console.log(`Weather server address is ${address}`);
+        const request = https.get(address, (res) => {
             res.setEncoding('utf8');
             let rawData = '';
             res.on('data', (chunk) => {
@@ -74,42 +86,25 @@ class WeatherWidget {
         });
     }
 
-    start() {
-        setImmediate(() => {
-            this.updateWeather();
-        });
-        this.weatherTimer = setInterval(() => {
-            this.updateWeather();
-        }, this.weatherUpdateInterval);
-    }
-
-    stop() {
-        // this.weatherTimer
-    }
-
     render(parent) {
 
-        if (this.weather) {
+        const {
+            temp = 0,
+            name = 'Неизвестно',
+            description = 'Идет загрузка данных ...',
+        } = this.weather;
 
-            const {
-                temp = 0,
-                name = 'Неизвестно',
-                description = 'Идет загрузка данных ...',
-            } = this.weather;
+        /* Рисуем небольшое изображение для прогноза погоды (иконку) */
+        //screen.DrawImage(, position.left + 16, position.top + 16);
 
-            /* Рисуем небольшое изображение для прогноза погоды (иконку) */
-            //screen.DrawImage(, position.left + 16, position.top + 16);
-
-            /* Рисуем сам прогноз погоды */
-            parent.DrawText({
-                font: 'WeatherFont',
-                text: `${name} ... ${temp} ... ${description}`,
-                x: 100,
-                y: 100,
-                color: [255,255,255],
-            });
-
-        }
+        /* Рисуем сам прогноз погоды */
+        parent.DrawText({
+            fontName: 'WeatherFont',
+            text: `${name} ... ${temp} ... ${description}`,
+            x: 100,
+            y: 100,
+            color: [255,255,255],
+        });
 
     }
 

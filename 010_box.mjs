@@ -9,7 +9,8 @@ class Application extends BringDesk {
 
         /* Создание виджета коробки */
         const boxWidget = new BoxWidget({
-            'background-color': '#bd11f9',
+            background: '#bd11f9',
+            rect: [0, 0, 100, 100],
         });
 
         /* Регистрируем коробку */

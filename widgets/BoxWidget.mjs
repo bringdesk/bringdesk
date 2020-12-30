@@ -7,24 +7,43 @@ class BoxWidget {
         this.options = options;
     }
 
-    setup() {
+    setup(parent) {
+        const {content} = this.options;
+        if (content) {
+            content.setup(parent);
+        }
     }
 
     render(parent) {
 
         const {
             rect = [ 0, 0, 0, 0 ],
-            color = [ 255, 0, 0 ],
+            background,
+//            border,
+            padding = [0, 0, 0, 0],
+            content,
         } = this.options;
 
+//        /* Если указаны край коробки */
+//        if (border) {
+//            const newBorder = parse(border);
+//            if (newBorder) {
+//                parent.FillRect(rect, newBorder);
+//            }
+//        }
+
         /* Если указа фон коробки */
-//      const newColor = parse(color);
-        if (color) {
-            parent.FillRect(rect, color);
+        if (background) {
+            const newBackground = parse(background);
+            if (newBackground) {
+                parent.FillRect(rect, newBackground);
+            }
         }
 
-        /* Если указаны край коробки */
-        // TODO - ...
+        /* Рисуем содержимое коробки */
+        if (content) {
+            content.render(parent);
+        }
 
     }
 

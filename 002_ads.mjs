@@ -30,7 +30,7 @@ class Application extends BringDesk {
         this.FillRect([0, 0, w, h], [0, 0, 0]);
 
         this.DrawText({
-            name: 'FreeSans',
+            fontName: 'FreeSans',
             text: 'На все Кухни',
             color: [255, 255, 0],
             x: 200,
@@ -40,7 +40,7 @@ class Application extends BringDesk {
         if (this.active) {
 
             this.DrawText({
-                name: 'FreeSans',
+                fontName: 'FreeSans',
                 text: 'скидка 5%',
                 color: [255, 0, 0],
                 x: 200,
@@ -50,7 +50,7 @@ class Application extends BringDesk {
         }
 
         this.DrawText({
-            name: 'FreeSans',
+            fontName: 'FreeSans',
             text: '2 этаж',
             color: [0, 255, 0],
             x: 200,

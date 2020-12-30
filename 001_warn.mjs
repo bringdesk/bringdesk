@@ -36,7 +36,7 @@ class Application extends BringDesk {
         let posY = 300;
         lines.forEach((line) => {
             this.DrawText({
-                name: 'FreeSans',
+                fontName: 'FreeSans',
                 text: line,
                 color: [255, 255, 255],
                 x: posX,
