@@ -1,12 +1,10 @@
 {
-  "name": "bringdesk",
+  "name": "@vit1251/bringdesk",
   "version": "1.0.0",
-  "scripts": {
-    "check": "node --experimental-specifier-resolution=node 011_weather.mjs"
-  },
   "author": "Vitold Sedyshev",
   "license": "proprietary",
   "dependencies": {
+    "@vit1251/napi_sdl2": "^0.1.4",
     "dateformat": "^3.0.3",
     "input-event": "^1.2.6",
     "log4js": "^5.3.0",

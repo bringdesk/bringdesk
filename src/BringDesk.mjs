@@ -1,5 +1,5 @@
 
-import SDL2 from 'napi-sdl2';
+import SDL2 from '@vit1251/napi_sdl2';
 
 class BringDesk {
 
