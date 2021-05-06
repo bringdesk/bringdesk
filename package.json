@@ -1,6 +1,6 @@
 {
   "name": "@vit1251/bringdesk",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "author": "Vitold Sedyshev",
   "license": "proprietary",
   "dependencies": {
@@ -10,5 +10,13 @@
     "log4js": "^5.3.0",
     "parse-color": "^1.0.0",
     "yaml": "^1.7.2"
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/mjs/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/mjs/index.mjs",
+      "require": "./dist/cjs/index.js"
+    }
   }
 }

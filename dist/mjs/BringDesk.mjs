@@ -16,6 +16,7 @@ class BringDesk {
         const{name, path, size = 24} = options;
         this.fonts[name] = SDL2.TTF_OpenFont(path, size);
     }
+
     LoadImage(options = {}) {
     }
 
