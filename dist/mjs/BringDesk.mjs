@@ -95,6 +95,11 @@ class BringDesk {
         SDL2.SDL_Init(SDL2.SDL_INIT_EVERYTHING);
         SDL2.TTF_Init();
 
+        /* Prepare screen */
+        console.log(`Prepare scrren: disable screenshare, hide cursor.`);
+        SDL2.SDL_DisableScreenSaver();
+        SDL2.SDL_ShowCursor(0);
+
         this.setup();
 
         const numVideoDisplays = SDL2.SDL_GetNumVideoDisplays();

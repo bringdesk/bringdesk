@@ -1,10 +1,10 @@
 {
   "name": "@vit1251/bringdesk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Vitold Sedyshev",
   "license": "proprietary",
   "dependencies": {
-    "@vit1251/napi_sdl2": "^0.1.4",
+    "@vit1251/napi_sdl2": "^0.1.5",
     "dateformat": "^3.0.3",
     "input-event": "^1.2.6",
     "log4js": "^5.3.0",
