@@ -128,10 +128,6 @@ class BringDesk {
 
         this.render();
 
-        const cursor = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_ARROW);
-        SDL2.SDL_SetCursor(cursor);
-        SDL2.SDL_ShowCursor(1);
-
         this.mainTimer = setInterval(() => {
 
             const event = {};
@@ -154,6 +150,11 @@ class BringDesk {
 
         /* Stop */
         cancelInterval(this.mainTimer);
+
+        /* Restore cursor */
+        const cursor = SDL2.SDL_CreateSystemCursor(SDL2.SDL_SYSTEM_CURSOR_ARROW);
+        SDL2.SDL_SetCursor(cursor);
+        SDL2.SDL_ShowCursor(1);
 
         /* Release resources */
         SDL2.TTF_Quit();
