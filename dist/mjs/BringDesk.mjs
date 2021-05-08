@@ -10,6 +10,7 @@ class BringDesk {
         this.widgets = [];
         this.width = 0;
         this.height = 0;
+        this.background = [0xFF, 0xFF, 0xFF, 0xFF];
     }
 
     LoadFont(options = {}) {
@@ -35,7 +36,7 @@ class BringDesk {
      * Clear screen
      */
     Clear() {
-        SDL2.SDL_SetRenderDrawColor( this.renderer, [0xFF, 0xFF, 0xFF, 0xFF] );
+        SDL2.SDL_SetRenderDrawColor( this.renderer, this.background );
         SDL2.SDL_RenderClear( this.renderer );
     }
 
