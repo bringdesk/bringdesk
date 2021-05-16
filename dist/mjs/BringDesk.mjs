@@ -91,6 +91,13 @@ class BringDesk {
         return [ this.width, this.height ];
     }
 
+    handleEvent(event = {}) {
+        console.log(`Event `, event);
+        if (event.type === 'QUIT') {
+            this.Stop();
+        }
+    }
+
     run() {
 
         SDL2.SDL_Init(SDL2.SDL_INIT_EVERYTHING);
@@ -134,11 +141,8 @@ class BringDesk {
             const event = {};
             const ret = SDL2.SDL_PollEvent(event);
             if (ret == 1) {
-                //console.log(`Event: Type = ${event.type}`);
-                if (event.type === 'QUIT')
-                {
-                    this.Stop();
-                }
+                this.handleEvent(event);
+
             }
 
             this.render();
