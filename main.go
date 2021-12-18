@@ -3,14 +3,19 @@ package main
 import (
 	"github.com/bringdesk/bringdesk/ctx"
 	"github.com/bringdesk/bringdesk/evt"
+	"github.com/bringdesk/bringdesk/smarthome"
 	"github.com/bringdesk/bringdesk/widgets"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 	"log"
+	"time"
 )
 
 type Application struct {
-	running    bool
-	mainWidget widgets.IWidget
+	running          bool
+	mainWidget       widgets.IWidget
+	renderFrameCount int64
 }
 
 func NewApplication() *Application {
@@ -18,10 +23,24 @@ func NewApplication() *Application {
 }
 
 func (self *Application) Run() {
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
+
+	err1 := sdl.Init(sdl.INIT_EVERYTHING)
+	if err1 != nil {
+		panic(err1)
 	}
 	defer sdl.Quit()
+
+	err2 := img.Init(img.INIT_JPG | img.INIT_PNG)
+	if err2 != nil {
+		panic(err2)
+	}
+	defer img.Quit()
+
+	err3 := ttf.Init()
+	if err3 != nil {
+		panic(err3)
+	}
+	defer ttf.Quit()
 
 	displayCount, _ := sdl.GetNumVideoDisplays()
 	log.Printf("System contain %d display(s)", displayCount)
@@ -34,6 +53,8 @@ func (self *Application) Run() {
 	}
 
 	var mainRect sdl.Rect = rects[1]
+	ctx.SetRect(&mainRect)
+
 	window, err := sdl.CreateWindow("test", mainRect.X, mainRect.Y, mainRect.W, mainRect.H, sdl.WINDOW_SHOWN|
 		sdl.WINDOW_FULLSCREEN_DESKTOP)
 	if err != nil {
@@ -43,6 +64,13 @@ func (self *Application) Run() {
 
 	ctx.SetWindow(window)
 
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	if err != nil {
+		panic(err)
+	}
+	ctx.SetRenderer(renderer)
+
+	/* Single color screen */
 	surface, err := window.GetSurface()
 	if err != nil {
 		panic(err)
@@ -51,19 +79,30 @@ func (self *Application) Run() {
 
 	ctx.SetSurface(surface)
 
-	/* Initialize main screen */
-	self.mainWidget = widgets.NewWelcomeWidget()
+	self.mainWidget = smarthome.NewMainWidget()
 
-	var rate float64 = 1000 * 1.0 / 25
+	var rate float64 = 1000 * 1.0 / 26
 	log.Printf("Frame rate %.03f", rate)
 
+	/* Frame rate monitor */
+	go func() {
+		for {
+			log.Printf("Frame rate %d", self.renderFrameCount)
+			self.renderFrameCount = 0
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	/* Main process */
 	self.running = true
 	for self.running {
+
+		startTime := time.Now()
 
 		/* Start events processing */
 		var event sdl.Event
 		for {
-			event = sdl.WaitEventTimeout(int(rate))
+			event = sdl.PollEvent()
 			if event == nil {
 				break
 			}
@@ -75,6 +114,20 @@ func (self *Application) Run() {
 
 		/* Render main scene */
 		self.mainWidget.Render()
+		renderer.Present() //SDL_RenderPresent(renderer)
+		//window.UpdateSurface()
+
+		/* Frame rate calculator */
+		self.renderFrameCount += 1
+
+		/* Wait */
+		renderDuration := time.Since(startTime)
+		var newWait uint32 = 0
+		var renderDurationMs int64 = renderDuration.Milliseconds()
+		if float64(renderDurationMs) < rate {
+			newWait = uint32(int64(rate) - renderDurationMs)
+		}
+		sdl.Delay(newWait)
 
 	}
 }

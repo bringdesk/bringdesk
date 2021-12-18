@@ -1,32 +1,37 @@
-package widgets
+package welcome
 
 import (
 	"github.com/bringdesk/bringdesk/ctx"
+	"github.com/bringdesk/bringdesk/widgets"
 	"github.com/veandco/go-sdl2/sdl"
+	"log"
 )
 
 type WelcomeWidget struct {
-	posX float64
-	posY float64
-	dX   float64
-	dY   float64
+	posX        float64
+	posY        float64
+	dX          float64
+	dY          float64
+	startButton *widgets.ButtonWidget /* Start button */
 }
 
 func NewWelcomeWidget() *WelcomeWidget {
 	newWelcomeWidget := new(WelcomeWidget)
+
+	newWelcomeWidget.startButton = widgets.NewButtonWidget()
+	newWelcomeWidget.startButton.SetCallback(func() {
+		log.Printf("Main button pressed ")
+	})
+
 	newWelcomeWidget.dX = 2.5
 	newWelcomeWidget.dY = 7.02
+
 	return newWelcomeWidget
 }
 
 func (self *WelcomeWidget) Render() {
 
-	mainWindow := ctx.GetWindow()
-	mainSurface := ctx.GetSurface()
-
-	/* Clear screen */
-	mainRect := sdl.Rect{0, 0, 2000, 2000}
-	mainSurface.FillRect(&mainRect, 0x00000000)
+	mainRenderer := ctx.GetRenderer()
 
 	self.posX = self.posX + self.dX
 	self.posY = self.posY + self.dY
@@ -38,8 +43,9 @@ func (self *WelcomeWidget) Render() {
 		self.dY = -self.dY
 	}
 
+	mainRenderer.SetDrawColor(0xFF, 0, 0, 0xFF)
+
 	rect := sdl.Rect{int32(self.posX), int32(self.posY), 20, 20}
-	mainSurface.FillRect(&rect, 0xffff0000)
-	mainWindow.UpdateSurface()
+	mainRenderer.FillRect(&rect)
 
 }

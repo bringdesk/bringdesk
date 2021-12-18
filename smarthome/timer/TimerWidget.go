@@ -11,3 +11,13 @@ func NewTimerWidget() *TimerWidget {
 	newTimerWidget := new(TimerWidget)
 	return newTimerWidget
 }
+
+// StateSave save timer on disk
+func StateSave() {
+
+}
+
+// StateRestore restore timer state from disk
+func StateRestore() {
+
+}
