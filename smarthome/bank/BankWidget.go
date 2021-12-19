@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/widgets"
 	"golang.org/x/text/encoding/charmap"
 	"io"
@@ -53,6 +54,9 @@ func NewBankWidget() *BankWidget {
 		}
 	}()
 	return newBankWidget
+}
+
+func (self *BankWidget) ProcessEvent(e *evt.Event) {
 }
 
 func (self *BankWidget) updateData() {

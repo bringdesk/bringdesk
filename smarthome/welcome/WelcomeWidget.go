@@ -2,6 +2,7 @@ package welcome
 
 import (
 	"github.com/bringdesk/bringdesk/ctx"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/widgets"
 	"github.com/veandco/go-sdl2/sdl"
 	"log"
@@ -27,6 +28,9 @@ func NewWelcomeWidget() *WelcomeWidget {
 	newWelcomeWidget.dY = 7.02
 
 	return newWelcomeWidget
+}
+
+func (self *WelcomeWidget) ProcessEvent(e *evt.Event) {
 }
 
 func (self *WelcomeWidget) Render() {

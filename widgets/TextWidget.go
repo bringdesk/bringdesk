@@ -5,40 +5,26 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"log"
-	"path"
 )
 
 type TextWidget struct {
-	IWidget           /* Widget interface is implementing */
-	body    string    /* Widget content                   */
-	font    *ttf.Font /* Widget font                      */
-	color   sdl.Color
-	height  int32
-	width   int32
-	x       int32
-	y       int32
+	IWidget          /* Widget interface is implementing */
+	body     string    /* Widget content                   */
+	font     *ttf.Font /* Widget font                      */
+	color    sdl.Color
+	height   int32
+	width    int32
+	x        int32
+	y        int32
+
+	fntAlias string
+	fntSize  int
 }
 
 func NewTextWidget(fontAlias string, fontSize int) *TextWidget {
 	newTextWidget := new(TextWidget)
-
-	fontAliases := make(map[string]string)
-	fontAliases["PublicSans"] = "PublicSans-Regular.otf"
-
-	fontFile := fontAliases[fontAlias]
-	if fontFile == "" {
-		fontFile = "PublicSans-Regular.otf"
-	}
-
-	baseDir := ctx.GetBaseDir()
-	newPath := path.Join(baseDir, "resources", "fonts", fontFile)
-	newFont, err2 := ttf.OpenFont(newPath, fontSize)
-	if err2 != nil {
-		panic(err2)
-	}
-
-	newTextWidget.font = newFont
-
+	newTextWidget.fntAlias = fontAlias
+	newTextWidget.fntSize = fontSize
 	return newTextWidget
 }
 
@@ -51,9 +37,14 @@ func (self *TextWidget) SetColor(r byte, g byte, b byte, a byte) {
 
 func (self *TextWidget) Render() {
 
+	mainFontManager := ctx.GetFontManager()
 	mainRenderer := ctx.GetRenderer()
 
-	surface, err1 := self.font.RenderUTF8Blended(self.body, self.color)
+	/**/
+	font, _ := mainFontManager.Acquire(self.fntAlias, self.fntSize)
+
+	/**/
+	surface, err1 := font.RenderUTF8Blended(self.body, self.color)
 	if err1 != nil {
 		log.Printf("RenderUTF8Blended: err = %#v", err1)
 	}
@@ -62,6 +53,9 @@ func (self *TextWidget) Render() {
 	newPosition := sdl.Rect{self.x, self.y, surface.W, surface.H}
 
 	mainRenderer.Copy(texture, nil, &newPosition)
+
+	/* Release resources */
+	mainFontManager.Release(font)
 
 	surface.Free()
 	texture.Destroy()
@@ -80,5 +74,5 @@ func (self *TextWidget) SetRect(x int, y int, width int, height int) {
 }
 
 func (self *TextWidget) Destroy() {
-	self.font.Close()
+	//self.font.Close()
 }

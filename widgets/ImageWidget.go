@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"github.com/bringdesk/bringdesk/ctx"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"log"
@@ -31,6 +32,9 @@ func NewImageWidget(path string) *ImageWidget {
 
 	return iw
 
+}
+
+func (self *ImageWidget) ProcessEvent(e *evt.Event) {
 }
 
 func (self *ImageWidget) Render() {

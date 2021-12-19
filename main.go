@@ -5,6 +5,7 @@ import (
 	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/skin"
 	"github.com/bringdesk/bringdesk/smarthome"
+	"github.com/bringdesk/bringdesk/util"
 	"github.com/bringdesk/bringdesk/widgets"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/mix"
@@ -12,13 +13,13 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 	"log"
 	"os"
+	"path"
 	"time"
 )
 
 type Application struct {
 	running          bool
 	mainWidget       widgets.IWidget
-	renderFrameCount int64
 }
 
 func NewApplication() *Application {
@@ -27,33 +28,39 @@ func NewApplication() *Application {
 
 func (self *Application) Run() {
 
+	/* Initialize SDL2 */
 	err1 := sdl.Init(sdl.INIT_EVERYTHING)
 	if err1 != nil {
 		panic(err1)
 	}
 	defer sdl.Quit()
 
+	/* Initialize SDL_img */
 	err2 := img.Init(img.INIT_JPG | img.INIT_PNG)
 	if err2 != nil {
 		panic(err2)
 	}
 	defer img.Quit()
 
+	/* Initialize SDL_ttf */
 	err3 := ttf.Init()
 	if err3 != nil {
 		panic(err3)
 	}
 	defer ttf.Quit()
 
-	/* Prepare main directory */
+	/* Detect resources directory */
 	workDirectory, err4 := os.Getwd()
 	if err4 != nil {
 		panic(err4)
 	}
 	ctx.SetBaseDir(workDirectory)
 
-	/* Parse execution arguments */
-	//os.ParseArgs
+	/* Parse arguments */
+	// TODO - os.ParseArgs...
+
+	/* Reading configuration */
+	// TODO - read configuration file ...
 
 	/* Reading skin */
 	mainSkin := skin.NewSkin()
@@ -73,17 +80,20 @@ func (self *Application) Run() {
 	log.Printf("System contain %d display(s)", displayCount)
 
 	var rects []sdl.Rect
+	var mainRect sdl.Rect
 	for displayIndex := 0; displayIndex < displayCount; displayIndex++ {
 		rect, _ := sdl.GetDisplayBounds(displayIndex)
 		rects = append(rects, rect)
-		log.Printf("Display %d bounds is %#v", displayIndex, rect)
+		mainRect = rect
 	}
-
-	var mainRect sdl.Rect = rects[mainSkin.DisplayIndex]
 	ctx.SetRect(&mainRect)
 
-	window, err := sdl.CreateWindow("test", mainRect.X, mainRect.Y, mainRect.W, mainRect.H, sdl.WINDOW_SHOWN|
-		sdl.WINDOW_FULLSCREEN_DESKTOP)
+	/* Create main window */
+	window, err := sdl.CreateWindow("BringDesk",
+		mainRect.X, mainRect.Y,
+		mainRect.W, mainRect.H,
+		sdl.WINDOW_SHOWN | sdl.WINDOW_FULLSCREEN_DESKTOP,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -91,37 +101,36 @@ func (self *Application) Run() {
 
 	ctx.SetWindow(window)
 
+	/* Create main renderer */
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		panic(err)
 	}
 	ctx.SetRenderer(renderer)
 
-	/* Single color screen */
+	/* Create main surface */
 	surface, err := window.GetSurface()
 	if err != nil {
 		panic(err)
 	}
-	surface.FillRect(nil, 0)
-
 	ctx.SetSurface(surface)
 
+	/* Start font manager */
+	newFontManager := util.NewFontManager()
+	baseDir := ctx.GetBaseDir()
+	searchPath := path.Join(baseDir, "resources", "fonts")
+	newFontManager.SetSearchPath(searchPath)
+	ctx.SetFontManager(newFontManager)
+
+	/* Create main view */
 	self.mainWidget = smarthome.NewMainWidget()
 
+	/* Setup frame rate */
 	var rate float64 = 1000 * 1.0 / 26
 	log.Printf("Frame rate %.03f", rate)
 
 	/* Set blending mode */
 	renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
-
-	/* Frame rate monitor */
-	go func() {
-		for {
-			log.Printf("Frame rate %d", self.renderFrameCount)
-			self.renderFrameCount = 0
-			time.Sleep(1 * time.Second)
-		}
-	}()
 
 	/* Main process */
 	self.running = true
@@ -137,7 +146,7 @@ func (self *Application) Run() {
 				break
 			}
 			e := evt.NewEventFromSDL(event)
-			if e.EvType != evt.EventTypeNone {
+			if e != nil {
 				self.ProcessEvent(e)
 			}
 		}
@@ -146,9 +155,6 @@ func (self *Application) Run() {
 		self.mainWidget.Render()
 		renderer.Present() //SDL_RenderPresent(renderer)
 		//window.UpdateSurface()
-
-		/* Frame rate calculator */
-		self.renderFrameCount += 1
 
 		/* Wait */
 		renderDuration := time.Since(startTime)
@@ -163,6 +169,8 @@ func (self *Application) Run() {
 }
 
 func (self *Application) ProcessEvent(e *evt.Event) {
+
+	/* Main application event processing */
 	if e.EvType == evt.EventTypeKeyboard {
 
 	} else if e.EvType == evt.EventTypeMouse {
@@ -176,11 +184,13 @@ func (self *Application) ProcessEvent(e *evt.Event) {
 	} else {
 		log.Printf("No idea how to handle %#v", e)
 	}
+
+	/* Widget application event processing */
+	self.mainWidget.ProcessEvent(e)
+
 }
 
 func main() {
-
 	app := NewApplication()
 	app.Run()
-
 }

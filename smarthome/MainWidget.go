@@ -2,8 +2,10 @@ package smarthome
 
 import (
 	"github.com/bringdesk/bringdesk/ctx"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/smarthome/bank"
 	"github.com/bringdesk/bringdesk/smarthome/clock"
+	"github.com/bringdesk/bringdesk/smarthome/debug"
 	"github.com/bringdesk/bringdesk/smarthome/gismeteo"
 	"github.com/bringdesk/bringdesk/smarthome/timer"
 	"github.com/bringdesk/bringdesk/smarthome/welcome"
@@ -48,10 +50,18 @@ func NewMainWidget() *MainWidget {
 	//clockWidget.SetRect()
 	mainWidgetGroup.RegisterWidget(clockWidget)
 
+	/* Debug widget */
+	debugWidget := debug.NewDebugWidget()
+	mainWidgetGroup.RegisterWidget(debugWidget)
+
 	/* Save */
 	newMainWidget.widget = mainWidgetGroup
 
 	return newMainWidget
+}
+
+func (self *MainWidget) ProcessEvent(e *evt.Event) {
+	// TODO - process events...
 }
 
 func (self *MainWidget) Render() {

@@ -3,6 +3,7 @@ package timer
 import (
 	"fmt"
 	"github.com/bringdesk/bringdesk/ctx"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/widgets"
 	"github.com/veandco/go-sdl2/mix"
 	"path"
@@ -32,14 +33,7 @@ func NewTimerWidget() *TimerWidget {
 	return newTimerWidget
 }
 
-// StateSave save timer on disk
-func StateSave() {
-
-}
-
-// StateRestore restore timer state from disk
-func StateRestore() {
-
+func (self *TimerWidget) ProcessEvent(e *evt.Event) {
 }
 
 func (self *TimerWidget) Render() {

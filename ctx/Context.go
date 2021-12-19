@@ -2,6 +2,7 @@ package ctx
 
 import (
 	"github.com/bringdesk/bringdesk/skin"
+	"github.com/bringdesk/bringdesk/util"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -11,6 +12,7 @@ var mainRenderer *sdl.Renderer
 var mainRect *sdl.Rect
 var mainDir string
 var mainSkin *skin.Skin
+var mainFontManager *util.FontManager
 
 func GetWindow() *sdl.Window {
 	return mainWindow
@@ -58,4 +60,12 @@ func SetSkin(newSkin *skin.Skin) {
 
 func GetSkin() *skin.Skin {
 	return mainSkin
+}
+
+func SetFontManager(fontManager *util.FontManager) {
+	mainFontManager = fontManager
+}
+
+func GetFontManager() *util.FontManager {
+	return mainFontManager
 }

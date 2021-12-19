@@ -3,6 +3,7 @@ package gismeteo
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/widgets"
 	"io"
 	"log"
@@ -86,44 +87,48 @@ type GismeteoResponse struct {
 
 func NewGismeteoWidget() *GismeteoWidget {
 	newGismeteoWidget := new(GismeteoWidget)
+	go func() {
+		for {
+			newGismeteoWidget.updateData()
+			/* Wait 10 min */
+			time.Sleep(30 * time.Minute)
+		}
+	}()
 	newGismeteoWidget.updateData()
 	return newGismeteoWidget
 }
 
 func (self *GismeteoWidget) updateData() {
-	go func() {
 
-		for {
-			client := http.Client{
-				Timeout: 15 * time.Second,
-			}
-			req, _ := http.NewRequest("GET", "https://api.gismeteo.net/v2/weather/current/?latitude=54.35&longitude=52.52", nil)
-			req.Header.Add("X-Gismeteo-Token", "56b30cb255.3443075")
+	/* Step 1. Download response */
+	client := http.Client{
+		Timeout: 15 * time.Second,
+	}
+	req, _ := http.NewRequest("GET", "https://api.gismeteo.net/v2/weather/current/?latitude=54.35&longitude=52.52", nil)
+	req.Header.Add("X-Gismeteo-Token", "56b30cb255.3443075")
 
-			resp, err := client.Do(req)
-			if err != nil {
-				log.Printf("Problem with Gismeto result: err = %#v", err)
-				return
-			}
-			defer resp.Body.Close()
-			var out bytes.Buffer
-			io.Copy(&out, resp.Body)
-			log.Printf("out = %s", out.String())
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Problem with Gismeto result: err = %#v", err)
+		return
+	}
+	defer resp.Body.Close()
+	var out bytes.Buffer
+	io.Copy(&out, resp.Body)
+	log.Printf("out = %s", out.String())
 
-			/* Check response */
-			var errorResponse GismeteoErrorResponse
-			err1 := json.Unmarshal(out.Bytes(), &errorResponse)
-			if err1 != nil {
-				log.Printf("Parse error: err = %#v", err1)
-			} else {
-				self.error = errorResponse.Meta.Message
-			}
+	/* Step 2. Parse Gismeteo response */
+	var errorResponse GismeteoErrorResponse
+	err1 := json.Unmarshal(out.Bytes(), &errorResponse)
+	if err1 != nil {
+		log.Printf("Parse error: err = %#v", err1)
+	} else {
+		self.error = errorResponse.Meta.Message
+	}
 
-			/* Wait 10 min */
-			time.Sleep(10 * time.Minute)
-		}
+}
 
-	}()
+func (self *GismeteoWidget) ProcessEvent(e *evt.Event) {
 }
 
 func (self *GismeteoWidget) Render() {
@@ -133,6 +138,7 @@ func (self *GismeteoWidget) Render() {
 		errorMessage.SetColor(255, 0, 0, 128)
 		errorMessage.SetText(self.error)
 		errorMessage.Render()
+		errorMessage.Destroy()
 	}
 
 }

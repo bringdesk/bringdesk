@@ -1,6 +1,9 @@
 package evt
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/veandco/go-sdl2/sdl"
+	"log"
+)
 
 type EventType int
 
@@ -24,23 +27,32 @@ type Event struct {
 
 func NewEventFromSDL(e sdl.Event) *Event {
 
-	newEvent := &Event{}
+	log.Printf("NewEventFromSDL: e = %#v", e)
 
 	switch e.(type) {
 	case *sdl.KeyboardEvent:
-		newEvent.EvType = EventTypeKeyboard
-		break
+		newEvent := &Event{
+			EvType: EventTypeKeyboard,
+		}
+		return newEvent
+
 	case *sdl.MouseButtonEvent:
 		mouseButtonEvent, _ := e.(*sdl.MouseButtonEvent)
-		newEvent.EvType = EventTypeMouse
-		newEvent.Mouse.X = int(mouseButtonEvent.X)
-		newEvent.Mouse.Y = int(mouseButtonEvent.Y)
-		break
-		//	case *sdl.MouseMotionEvent:
-		//		newEvent.EvType = EventTypeMouse
+		newEvent := &Event{
+			EvType: EventTypeMouse,
+			Mouse: EventMouse{
+				X: int(mouseButtonEvent.X),
+				Y: int(mouseButtonEvent.Y),
+			},
+		}
+		return newEvent
+
 	case *sdl.QuitEvent:
-		newEvent.EvType = EventTypeQuit
+		newEvent := &Event{
+			EvType: EventTypeQuit,
+		}
+		return newEvent
 	}
 
-	return newEvent
+	return nil
 }
