@@ -11,10 +11,19 @@ const (
 )
 
 type Skin struct {
-	bgType     BgType      /* Background color    */
-	bgColor    color.Color /* Background color    */
-	bgImage    string      /* Background image    */
-	acentColor color.Color /* Main skin color     */
+	bgType       BgType      /* Background color    */
+	bgColor      color.Color /* Background color    */
+	bgImage      string      /* Background image    */
+	acentColor   color.Color /* Main skin color     */
+	DisplayIndex int         /* Display index       */
+}
+
+func (self *Skin) GetBgImage() string {
+	return self.bgImage
+}
+
+func (self *Skin) SetBgImage(bgImage string) {
+	self.bgImage = bgImage
 }
 
 func NewSkin() *Skin {

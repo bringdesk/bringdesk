@@ -1,11 +1,16 @@
 package ctx
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/bringdesk/bringdesk/skin"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 var mainWindow *sdl.Window
 var mainSurface *sdl.Surface
 var mainRenderer *sdl.Renderer
 var mainRect *sdl.Rect
+var mainDir string
+var mainSkin *skin.Skin
 
 func GetWindow() *sdl.Window {
 	return mainWindow
@@ -40,5 +45,17 @@ func SetRect(rect *sdl.Rect) {
 }
 
 func GetBaseDir() string {
-	return "C:\\Users\\vit12\\Work\\bringdesk"
+	return mainDir
+}
+
+func SetBaseDir(baseDir string) {
+	mainDir = baseDir
+}
+
+func SetSkin(newSkin *skin.Skin) {
+	mainSkin = newSkin
+}
+
+func GetSkin() *skin.Skin {
+	return mainSkin
 }

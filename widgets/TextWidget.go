@@ -4,6 +4,7 @@ import (
 	"github.com/bringdesk/bringdesk/ctx"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
+	"log"
 	"path"
 )
 
@@ -25,9 +26,12 @@ func NewTextWidget(fontAlias string, fontSize int) *TextWidget {
 	fontAliases["PublicSans"] = "PublicSans-Regular.otf"
 
 	fontFile := fontAliases[fontAlias]
+	if fontFile == "" {
+		fontFile = "PublicSans-Regular.otf"
+	}
 
 	baseDir := ctx.GetBaseDir()
-	newPath := path.Join(baseDir, "resources", fontFile)
+	newPath := path.Join(baseDir, "resources", "fonts", fontFile)
 	newFont, err2 := ttf.OpenFont(newPath, fontSize)
 	if err2 != nil {
 		panic(err2)
@@ -49,12 +53,18 @@ func (self *TextWidget) Render() {
 
 	mainRenderer := ctx.GetRenderer()
 
-	surface, _ := self.font.RenderUTF8Blended(self.body, self.color)
+	surface, err1 := self.font.RenderUTF8Blended(self.body, self.color)
+	if err1 != nil {
+		log.Printf("RenderUTF8Blended: err = %#v", err1)
+	}
 	texture, _ := mainRenderer.CreateTextureFromSurface(surface)
 
 	newPosition := sdl.Rect{self.x, self.y, surface.W, surface.H}
 
 	mainRenderer.Copy(texture, nil, &newPosition)
+
+	surface.Free()
+	texture.Destroy()
 
 }
 
@@ -67,4 +77,8 @@ func (self *TextWidget) SetRect(x int, y int, width int, height int) {
 	self.y = int32(y)
 	self.width = int32(width)
 	self.height = int32(height)
+}
+
+func (self *TextWidget) Destroy() {
+	self.font.Close()
 }

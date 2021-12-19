@@ -3,12 +3,15 @@ package main
 import (
 	"github.com/bringdesk/bringdesk/ctx"
 	"github.com/bringdesk/bringdesk/evt"
+	"github.com/bringdesk/bringdesk/skin"
 	"github.com/bringdesk/bringdesk/smarthome"
 	"github.com/bringdesk/bringdesk/widgets"
 	"github.com/veandco/go-sdl2/img"
+	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"log"
+	"os"
 	"time"
 )
 
@@ -42,6 +45,30 @@ func (self *Application) Run() {
 	}
 	defer ttf.Quit()
 
+	/* Prepare main directory */
+	workDirectory, err4 := os.Getwd()
+	if err4 != nil {
+		panic(err4)
+	}
+	ctx.SetBaseDir(workDirectory)
+
+	/* Parse execution arguments */
+	//os.ParseArgs
+
+	/* Reading skin */
+	mainSkin := skin.NewSkin()
+	mainSkin.DisplayIndex = 1
+	//mainSkin.SetAcentColor(100, 120, 30, 255)
+	mainSkin.SetBgImage("pexels-cottonbro-4937197.jpg")
+	ctx.SetSkin(mainSkin)
+
+	/* Open audio mixer */
+	err5 := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 2048)
+	if err5 != nil {
+		log.Printf("err1 = %#v", err5)
+	}
+
+	/* Select monitor base on skin */
 	displayCount, _ := sdl.GetNumVideoDisplays()
 	log.Printf("System contain %d display(s)", displayCount)
 
@@ -52,7 +79,7 @@ func (self *Application) Run() {
 		log.Printf("Display %d bounds is %#v", displayIndex, rect)
 	}
 
-	var mainRect sdl.Rect = rects[1]
+	var mainRect sdl.Rect = rects[mainSkin.DisplayIndex]
 	ctx.SetRect(&mainRect)
 
 	window, err := sdl.CreateWindow("test", mainRect.X, mainRect.Y, mainRect.W, mainRect.H, sdl.WINDOW_SHOWN|
@@ -83,6 +110,9 @@ func (self *Application) Run() {
 
 	var rate float64 = 1000 * 1.0 / 26
 	log.Printf("Frame rate %.03f", rate)
+
+	/* Set blending mode */
+	renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 
 	/* Frame rate monitor */
 	go func() {
