@@ -12,6 +12,7 @@ import (
 )
 
 type GismeteoWidget struct {
+	widgets.BaseWidget
 	error string /* Код ошибки             */
 }
 
@@ -133,9 +134,12 @@ func (self *GismeteoWidget) ProcessEvent(e *evt.Event) {
 
 func (self *GismeteoWidget) Render() {
 
+	self.BaseWidget.Render()
+
 	if self.error != "" {
 		errorMessage := widgets.NewTextWidget("", 16)
 		errorMessage.SetColor(255, 0, 0, 128)
+		errorMessage.SetRect(self.X, self.Y, self.Width, self.Height)
 		errorMessage.SetText(self.error)
 		errorMessage.Render()
 		errorMessage.Destroy()

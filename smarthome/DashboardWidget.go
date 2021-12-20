@@ -13,45 +13,54 @@ import (
 	"path"
 )
 
-type MainWidget struct {
+type DashboardWidget struct {
 	widgets.IWidget
-	widget widgets.IWidget
+	widget           widgets.IWidget
+	backgroundWidget widgets.IWidget
 }
 
-func NewMainWidget() *MainWidget {
+func NewMainWidget() *DashboardWidget {
 
+	newMainWidget := new(DashboardWidget)
+
+	/* Initialize skin and backgrounds */
 	mainDir := ctx.GetBaseDir()
 	mainSkin := ctx.GetSkin()
-
-	newMainWidget := new(MainWidget)
+	imageName := mainSkin.GetBgImage()
+	if imageName != "" {
+		newPath := path.Join(mainDir, "resources", "wallpapers", imageName)
+		newMainWidget.backgroundWidget = widgets.NewImageWidget(newPath)
+	} else {
+		// TODO - make solid color rectangle widget ...
+	}
 
 	/* Initialize main screen */
 	mainWidgetGroup := widgets.NewWidgetGroup()
 
-	imageName := mainSkin.GetBgImage()
-	newPath := path.Join(mainDir, "resources", "wallpapers", imageName)
-	backgroundWidget := widgets.NewImageWidget(newPath)
-	mainWidgetGroup.RegisterWidget(backgroundWidget)
-
 	gismeteoWidget := gismeteo.NewGismeteoWidget()
+	gismeteoWidget.SetRect(100, 100, 240, 320)
 	//gismeteoWidget.SetUpdateInterval(10 * time.Minute)
 	mainWidgetGroup.RegisterWidget(gismeteoWidget)
 
 	welcomeWidget := welcome.NewWelcomeWidget()
+	welcomeWidget.SetRect(100 + 240 + 10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(welcomeWidget)
 
 	newTimerWidget := timer.NewTimerWidget()
+	newTimerWidget.SetRect(100 + 240 + 10 + 240 + 10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(newTimerWidget)
 
 	newBankWidget := bank.NewBankWidget()
+	newBankWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(newBankWidget)
 
 	clockWidget := clock.NewClockWidget()
-	//clockWidget.SetRect()
+	clockWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(clockWidget)
 
 	/* Debug widget */
 	debugWidget := debug.NewDebugWidget()
+	debugWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(debugWidget)
 
 	/* Save */
@@ -60,10 +69,15 @@ func NewMainWidget() *MainWidget {
 	return newMainWidget
 }
 
-func (self *MainWidget) ProcessEvent(e *evt.Event) {
-	// TODO - process events...
+func (self *DashboardWidget) ProcessEvent(e *evt.Event) {
+	self.widget.ProcessEvent(e)
 }
 
-func (self *MainWidget) Render() {
+func (self *DashboardWidget) Render() {
+
+	/* Render background */
+	self.backgroundWidget.Render()
+
+	/* Render widgets */
 	self.widget.Render()
 }

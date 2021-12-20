@@ -36,6 +36,7 @@ type ConvertRate struct {
 }
 
 type BankWidget struct {
+	widgets.BaseWidget
 	convertRates   []ConvertRate /* Conversation rate     */
 	updateIsActive bool          /* Update routine        */
 	updateDate     string        /* Bank update           */
@@ -140,11 +141,13 @@ func ParseCurrency(value string) float64 {
 
 func (self *BankWidget) Render() {
 
+	self.BaseWidget.Render()
+
 	for idx, c := range self.convertRates {
 		currencyWidget := widgets.NewTextWidget("", 21)
 		currencyWidget.SetText(fmt.Sprintf("%c - %.02f", c.currency, c.convertRate))
 		currencyWidget.SetColor(0, 0, 0, 0)
-		currencyWidget.SetRect(100, 100+idx*20, 100, 100)
+		currencyWidget.SetRect(self.X, self.Y + idx*20, 100, 100)
 		currencyWidget.Render()
 		currencyWidget.Destroy()
 	}

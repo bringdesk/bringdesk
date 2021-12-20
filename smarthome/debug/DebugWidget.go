@@ -10,7 +10,7 @@ import (
 )
 
 type DebugWidget struct {
-	widgets.IWidget
+	widgets.BaseWidget
 	FrameRate        int
 	FontCache        int
 	renderFrameCount int
@@ -36,18 +36,33 @@ func (self *DebugWidget) Render() {
 
 	self.renderFrameCount += 1
 
-	rectWidget := widgets.NewRectangleWidget()
-	rectWidget.SetRect(600, 600, 100, 100)
-	rectWidget.SetColor(100, 220,0, 128)
-	rectWidget.Render()
+	self.BaseWidget.Render()
 
-	msgWidget := widgets.NewTextWidget("", 21)
-	msg := fmt.Sprintf("Frame Rate %d Cache Font %d", self.FrameRate, self.FontCache)
-	msgWidget.SetText(msg)
-	msgWidget.SetColor(100, 0,0, 128)
-	msgWidget.SetRect(600, 600, 100, 100)
-	msgWidget.Render()
-	msgWidget.Destroy()
+	/* Show Frame Rate */
+	{
+		msgWidget := widgets.NewTextWidget("", 21)
+		msg := fmt.Sprintf("Frame Rate = %d",
+			self.FrameRate,
+		)
+		msgWidget.SetText(msg)
+		msgWidget.SetColor(100, 0, 0, 128)
+		msgWidget.SetRect(self.X, self.Y + 0*20, self.Width, self.Height)
+		msgWidget.Render()
+		msgWidget.Destroy()
+	}
+
+	/* Show Cache Font Count */
+	{
+		msgWidget := widgets.NewTextWidget("", 21)
+		msg := fmt.Sprintf("Cache Font %d",
+			self.FontCache,
+		)
+		msgWidget.SetText(msg)
+		msgWidget.SetColor(100, 0, 0, 128)
+		msgWidget.SetRect(self.X, self.Y + 1*20, self.Width, self.Height)
+		msgWidget.Render()
+		msgWidget.Destroy()
+	}
 
 }
 

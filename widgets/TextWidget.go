@@ -40,6 +40,8 @@ func (self *TextWidget) Render() {
 	mainFontManager := ctx.GetFontManager()
 	mainRenderer := ctx.GetRenderer()
 
+	//mainRenderer.SetClipRect()
+
 	/**/
 	font, _ := mainFontManager.Acquire(self.fntAlias, self.fntSize)
 
