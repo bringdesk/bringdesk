@@ -8,6 +8,7 @@ import (
 	"github.com/bringdesk/bringdesk/smarthome/debug"
 	"github.com/bringdesk/bringdesk/smarthome/gismeteo"
 	"github.com/bringdesk/bringdesk/smarthome/timer"
+	"github.com/bringdesk/bringdesk/smarthome/todoist"
 	"github.com/bringdesk/bringdesk/smarthome/welcome"
 	"github.com/bringdesk/bringdesk/widgets"
 	"path"
@@ -43,25 +44,30 @@ func NewMainWidget() *DashboardWidget {
 	mainWidgetGroup.RegisterWidget(gismeteoWidget)
 
 	welcomeWidget := welcome.NewWelcomeWidget()
-	welcomeWidget.SetRect(100 + 240 + 10, 100, 240, 320)
+	welcomeWidget.SetRect(100+240+10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(welcomeWidget)
 
 	newTimerWidget := timer.NewTimerWidget()
-	newTimerWidget.SetRect(100 + 240 + 10 + 240 + 10, 100, 240, 320)
+	newTimerWidget.SetRect(100+240+10+240+10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(newTimerWidget)
 
 	newBankWidget := bank.NewBankWidget()
-	newBankWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
+	newBankWidget.SetRect(100+240+10+240+10+240+10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(newBankWidget)
 
 	clockWidget := clock.NewClockWidget()
-	clockWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
+	clockWidget.SetRect(100+240+10+240+10+240+10+240+10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(clockWidget)
 
 	/* Debug widget */
 	debugWidget := debug.NewDebugWidget()
-	debugWidget.SetRect(100 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10 + 240 + 10, 100, 240, 320)
+	debugWidget.SetRect(100+240+10+240+10+240+10+240+10+240+10, 100, 240, 320)
 	mainWidgetGroup.RegisterWidget(debugWidget)
+
+	/* Todoist Widget */
+	todoistWidget := todoist.NewTodoistWidget()
+	todoistWidget.SetRect(100, 100+320+10, 240+10+240+10+240, 320)
+	mainWidgetGroup.RegisterWidget(todoistWidget)
 
 	/* Save */
 	newMainWidget.widget = mainWidgetGroup
