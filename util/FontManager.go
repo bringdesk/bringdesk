@@ -7,22 +7,39 @@ import (
 	"path"
 )
 
+type FontMeta struct {
+	Name string
+	Path string
+}
+
+type FontCache struct {
+	name  string
+	size  int
+	cache *ttf.Font
+}
+
 type FontManager struct {
 	searchPaths []string
 	useCount    int
-	fontAliases map[string]string
+	fonts       []FontMeta
+	caches      []FontCache
 }
 
 func NewFontManager() *FontManager {
-	newFontManager := &FontManager{
-		fontAliases: make(map[string]string),
-	}
+	newFontManager := &FontManager{}
 	return newFontManager
 }
 
 func (self *FontManager) registerFont(name string, fontPath string) {
 	log.Printf("Register fonr: name = %s path = %s", name, fontPath)
-	self.fontAliases[name] = fontPath
+	/* Step 1. Check exists */
+	// TODO - check already exists ...
+	/* Step 2. Register */
+	newFontMeta := FontMeta{
+		Name: name,
+		Path: fontPath,
+	}
+	self.fonts = append(self.fonts, newFontMeta)
 }
 
 func (self *FontManager) discoverFonts(searchPath string) error {
@@ -57,9 +74,9 @@ func (self *FontManager) Dump() {
 }
 
 func (self *FontManager) GetFontByName(name string) string {
-	for fntName, fntPath := range self.fontAliases {
-		if fntName == name {
-			return fntPath
+	for _, fnt := range self.fonts {
+		if fnt.Name == name {
+			return fnt.Path
 		}
 	}
 	return ""
@@ -67,6 +84,13 @@ func (self *FontManager) GetFontByName(name string) string {
 
 func (self *FontManager) Acquire(fontName string, fontSize int) (*ttf.Font, error) {
 	self.useCount += 1
+
+	/* Search in cache */
+	for _, c := range self.caches {
+		if c.name == fontName && c.size == fontSize {
+			return c.cache, nil
+		}
+	}
 
 	/* Search font by name */
 	fontPath := self.GetFontByName(fontName)
@@ -83,13 +107,23 @@ func (self *FontManager) Acquire(fontName string, fontSize int) (*ttf.Font, erro
 		return nil, err2
 	}
 
+	/* Save in cache */
+	newCache := FontCache{
+		name:  fontName,
+		size:  fontSize,
+		cache: newFont,
+	}
+	self.caches = append(self.caches, newCache)
+
 	return newFont, nil
 }
 
 func (self *FontManager) Release(font *ttf.Font) {
 	self.useCount -= 1
+	/* Search in cache */
+	// TODO - search in chache and release node ...
 	/* Release resource */
-	font.Close()
+	//font.Close()
 }
 
 func (self *FontManager) GetUseFontCount() int {
@@ -97,8 +131,18 @@ func (self *FontManager) GetUseFontCount() int {
 }
 
 func (self *FontManager) GetFontByIndex(index int) string {
-	for _, fontPath := range self.fontAliases {
-		return fontPath
+	for idx, fnt := range self.fonts {
+		if idx == index {
+			return fnt.Path
+		}
 	}
 	return ""
+}
+
+func (self *FontManager) GetFontCount() int {
+	return len(self.fonts)
+}
+
+func (self *FontManager) GetFontCacheCount() int {
+	return len(self.caches)
 }

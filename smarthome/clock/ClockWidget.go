@@ -24,7 +24,7 @@ func (self *ClockWidget) Render() {
 
 	nowTime := time.Now()
 
-	clockTextWidget := widgets.NewTextWidget("", 36)
+	clockTextWidget := widgets.NewTextWidget("JetBrains Mono", 36)
 	clockTextWidget.SetRect(self.X, self.Y, self.Width, self.Height)
 	clockTextWidget.SetColor(255, 0, 0, 0)
 	clockTextWidget.SetText(fmt.Sprintf("%02d:%02d", nowTime.Hour(), nowTime.Minute()))

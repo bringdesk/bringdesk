@@ -12,19 +12,17 @@ import (
 type DebugWidget struct {
 	widgets.BaseWidget
 	FrameRate        int
-	FontCache        int
 	renderFrameCount int
 }
 
 func NewDebugWidget() *DebugWidget {
-	mainFontManager := ctx.GetFontManager()
+
 	newDebugWidget := new(DebugWidget)
 	/* Frame rate monitor */
 	go func() {
 		for {
 			log.Printf("Frame rate %d", newDebugWidget.renderFrameCount)
 			newDebugWidget.FrameRate = newDebugWidget.renderFrameCount
-			newDebugWidget.FontCache = mainFontManager.GetUseFontCount()
 			newDebugWidget.renderFrameCount = 0
 			time.Sleep(1 * time.Second)
 		}
@@ -38,34 +36,25 @@ func (self *DebugWidget) Render() {
 
 	self.BaseWidget.Render()
 
-	/* Show Frame Rate */
-	{
-		msgWidget := widgets.NewTextWidget("", 21)
-		msg := fmt.Sprintf("Frame Rate = %d",
-			self.FrameRate,
-		)
-		msgWidget.SetText(msg)
-		msgWidget.SetColor(100, 0, 0, 128)
-		msgWidget.SetRect(self.X, self.Y + 0*20, self.Width, self.Height)
-		msgWidget.Render()
-		msgWidget.Destroy()
-	}
+	mainFontManager := ctx.GetFontManager()
 
-	/* Show Cache Font Count */
-	{
-		msgWidget := widgets.NewTextWidget("", 21)
-		msg := fmt.Sprintf("Cache Font %d",
-			self.FontCache,
-		)
-		msgWidget.SetText(msg)
-		msgWidget.SetColor(100, 0, 0, 128)
-		msgWidget.SetRect(self.X, self.Y + 1*20, self.Width, self.Height)
-		msgWidget.Render()
-		msgWidget.Destroy()
-	}
+	/* Show Frame Rate */
+	self.renderText(0, fmt.Sprintf("Frame Rate = %d", self.FrameRate))
+	self.renderText(1, fmt.Sprintf("Font use counter %d", mainFontManager.GetUseFontCount()))
+	self.renderText(2, fmt.Sprintf("Font count %d", mainFontManager.GetFontCount()))
+	self.renderText(3, fmt.Sprintf("Cache Font %d", mainFontManager.GetFontCacheCount()))
 
 }
 
 func (self *DebugWidget) ProcessEvent(evt *evt.Event) {
 
+}
+
+func (self *DebugWidget) renderText(i int, msg string) {
+	msgWidget := widgets.NewTextWidget("", 21)
+	msgWidget.SetText(msg)
+	msgWidget.SetColor(100, 0, 0, 128)
+	msgWidget.SetRect(self.X, self.Y+i*20, self.Width, self.Height)
+	msgWidget.Render()
+	msgWidget.Destroy()
 }
