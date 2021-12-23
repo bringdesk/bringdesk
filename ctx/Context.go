@@ -13,6 +13,7 @@ var mainRect *sdl.Rect
 var mainDir string
 var mainSkin *skin.Skin
 var mainFontManager *util.FontManager
+var mainNetworkManager *util.NetworkManager
 
 func GetWindow() *sdl.Window {
 	return mainWindow
@@ -68,4 +69,12 @@ func SetFontManager(fontManager *util.FontManager) {
 
 func GetFontManager() *util.FontManager {
 	return mainFontManager
+}
+
+func GetNetworkManager() *util.NetworkManager {
+	return mainNetworkManager
+}
+
+func SetNetworkManager(manager *util.NetworkManager) {
+	mainNetworkManager = manager
 }

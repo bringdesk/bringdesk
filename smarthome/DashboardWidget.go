@@ -7,6 +7,7 @@ import (
 	"github.com/bringdesk/bringdesk/smarthome/clock"
 	"github.com/bringdesk/bringdesk/smarthome/debug"
 	"github.com/bringdesk/bringdesk/smarthome/gismeteo"
+	"github.com/bringdesk/bringdesk/smarthome/news"
 	"github.com/bringdesk/bringdesk/smarthome/timer"
 	"github.com/bringdesk/bringdesk/smarthome/todoist"
 	"github.com/bringdesk/bringdesk/smarthome/welcome"
@@ -68,6 +69,11 @@ func NewMainWidget() *DashboardWidget {
 	todoistWidget := todoist.NewTodoistWidget()
 	todoistWidget.SetRect(100, 100+320+10, 240+10+240+10+240, 320)
 	mainWidgetGroup.RegisterWidget(todoistWidget)
+
+	/* News widget */
+	newsWidget := news.NewNewsWidget()
+	newsWidget.SetRect(100, 100+320+10+320+10, 240+10+240+10+240+10+240+10+240+10+240, 320)
+	mainWidgetGroup.RegisterWidget(newsWidget)
 
 	/* Save */
 	newMainWidget.widget = mainWidgetGroup

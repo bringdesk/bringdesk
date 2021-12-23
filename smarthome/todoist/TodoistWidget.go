@@ -1,15 +1,13 @@
 package todoist
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/bringdesk/bringdesk/ctx"
 	"github.com/bringdesk/bringdesk/evt"
 	"github.com/bringdesk/bringdesk/widgets"
-	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -84,29 +82,21 @@ func (self *TodoistWidget) recoverToken() {
 func (self *TodoistWidget) updateData() {
 	log.Printf("Todoist update start: apiToekn = %#v", self.apiToken)
 	if self.apiToken != "" {
-		// curl -X GET  -H "Authorization: "
+		mainNetworkManager := ctx.GetNetworkManager()
 
-		/* Step 1. Download response */
-		client := http.Client{
-			Timeout: 15 * time.Second,
-		}
-		req, _ := http.NewRequest("GET", "https://api.todoist.com/rest/v1/tasks", nil)
+		/* Step 1. Create new request */
+		req, _ := mainNetworkManager.MakeRequest("TodoistWidget", "GET", "https://api.todoist.com/rest/v1/tasks", 15)
 		newAuthorization := fmt.Sprintf("Bearer %s", self.apiToken)
-		req.Header.Add("Authorization", newAuthorization)
+		req.AddHeader("Authorization", newAuthorization)
 
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Printf("Problem with Gismeto result: err = %#v", err)
-			return
-		}
-		defer resp.Body.Close()
-		var out bytes.Buffer
-		io.Copy(&out, resp.Body)
-		log.Printf("out = %s", out.String())
+		/* Step 2. Perform request */
+		resp, _ := mainNetworkManager.Perform(req)
+		defer resp.Close()
 
 		/* Step 2. Processing TASK */
 		var tasks []TodoistTask
-		err3 := json.Unmarshal(out.Bytes(), &tasks)
+		out := resp.Bytes()
+		err3 := json.Unmarshal(out, &tasks)
 		if err3 != nil {
 			log.Printf("Unable parser Task issues")
 		}

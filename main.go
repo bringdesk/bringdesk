@@ -18,8 +18,8 @@ import (
 )
 
 type Application struct {
-	running          bool
-	mainWidget       widgets.IWidget
+	running    bool
+	mainWidget widgets.IWidget
 }
 
 func NewApplication() *Application {
@@ -92,7 +92,7 @@ func (self *Application) Run() {
 	window, err := sdl.CreateWindow("BringDesk",
 		mainRect.X, mainRect.Y,
 		mainRect.W, mainRect.H,
-		sdl.WINDOW_SHOWN | sdl.WINDOW_FULLSCREEN_DESKTOP,
+		sdl.WINDOW_SHOWN|sdl.WINDOW_FULLSCREEN_DESKTOP,
 	)
 	if err != nil {
 		panic(err)
@@ -121,6 +121,10 @@ func (self *Application) Run() {
 	searchPath := path.Join(baseDir, "resources", "fonts")
 	newFontManager.SetSearchPath(searchPath)
 	ctx.SetFontManager(newFontManager)
+
+	/* Create Network manager */
+	newNetworkManager := util.NewNetworkManager()
+	ctx.SetNetworkManager(newNetworkManager)
 
 	/* Create main view */
 	self.mainWidget = smarthome.NewMainWidget()
