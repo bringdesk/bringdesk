@@ -113,7 +113,6 @@ func (self *NewsWidget) updateData() {
 	req, _ := mainNetworkManager.MakeRequest("NewsWidget", "GET", "http://tass.ru/rss/v2.xml", 15)
 	resp, _ := mainNetworkManager.Perform(req)
 	/* Step 2. Parse RSS news */
-	log.Printf("resp = %#v", resp)
 	out := resp.Bytes()
 	var rssAtom RSSAtom
 	err2 := xml.Unmarshal(out, &rssAtom)

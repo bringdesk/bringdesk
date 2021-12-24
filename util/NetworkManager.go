@@ -26,6 +26,20 @@ func (self *NetworkRequest) AddHeader(headerName string, headerValue string) {
 	self.req.Header.Add(headerName, headerValue)
 }
 
+func (self *NetworkRequest) AddQueryParam(key string, value string) {
+
+	//
+	q := self.req.URL.Query()
+	q.Add(key, value)
+
+	//
+	self.req.URL.RawQuery = q.Encode()
+
+	//
+	log.Println("AddQueryParam: URL = %s", self.req.URL.String())
+
+}
+
 func NewNetworkManager() *NetworkManager {
 	return new(NetworkManager)
 }
@@ -72,6 +86,7 @@ func (self *NetworkManager) Perform(networkRequest *NetworkRequest) (*NetworkRes
 
 	resp, err := client.Do(networkRequest.req)
 	if err != nil {
+		log.Printf("HTTP error: err = %#v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()

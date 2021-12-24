@@ -6,8 +6,8 @@ import (
 	"github.com/bringdesk/bringdesk/smarthome/bank"
 	"github.com/bringdesk/bringdesk/smarthome/clock"
 	"github.com/bringdesk/bringdesk/smarthome/debug"
-	"github.com/bringdesk/bringdesk/smarthome/gismeteo"
 	"github.com/bringdesk/bringdesk/smarthome/news"
+	"github.com/bringdesk/bringdesk/smarthome/openweathermap"
 	"github.com/bringdesk/bringdesk/smarthome/timer"
 	"github.com/bringdesk/bringdesk/smarthome/todoist"
 	"github.com/bringdesk/bringdesk/smarthome/welcome"
@@ -39,10 +39,9 @@ func NewMainWidget() *DashboardWidget {
 	/* Initialize main screen */
 	mainWidgetGroup := widgets.NewWidgetGroup()
 
-	gismeteoWidget := gismeteo.NewGismeteoWidget()
-	gismeteoWidget.SetRect(100, 100, 240, 320)
-	//gismeteoWidget.SetUpdateInterval(10 * time.Minute)
-	mainWidgetGroup.RegisterWidget(gismeteoWidget)
+	openweathermapWidget := openweathermap.NewOpenWeatherMapWidget()
+	openweathermapWidget.SetRect(100, 100, 240, 320)
+	mainWidgetGroup.RegisterWidget(openweathermapWidget)
 
 	welcomeWidget := welcome.NewWelcomeWidget()
 	welcomeWidget.SetRect(100+240+10, 100, 240, 320)
