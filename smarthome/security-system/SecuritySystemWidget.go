@@ -21,8 +21,9 @@ type SecuritySystemWidget struct {
 	frameSync           sync.Mutex
 	frame               []byte
 	streamActive        bool
-	surface             *sdl.Surface
 	secureCameraAddress string
+	texture             *sdl.Texture
+	surface             *sdl.Surface
 }
 
 func NewSecuritySystemWidget() *SecuritySystemWidget {
@@ -114,16 +115,27 @@ func (self *SecuritySystemWidget) ProcessEvent(e *evt.Event) {
 func (self *SecuritySystemWidget) Render() {
 	self.BaseWidget.Render()
 
-	self.frameSync.Lock()
-	defer self.frameSync.Unlock()
-
-	/* Save image */
 	mainRenderer := ctx.GetRenderer()
 
 	newRect := sdl.Rect{X: int32(self.X), Y: int32(self.Y), W: int32(self.Width), H: int32(self.Height)}
-	texture, _ := mainRenderer.CreateTextureFromSurface(self.surface)
-	mainRenderer.Copy(texture, nil, &newRect)
-	texture.Destroy()
+
+	self.frameSync.Lock()
+	defer self.frameSync.Unlock()
+
+	/**/
+	if self.surface != nil {
+		if self.texture != nil {
+			self.texture.Destroy()
+			self.texture = nil
+		}
+		texture, err2 := mainRenderer.CreateTextureFromSurface(self.surface)
+		if err2 != nil {
+			panic(err2)
+		}
+		self.texture = texture
+		//
+		mainRenderer.Copy(self.texture, nil, &newRect)
+	}
 
 	/* Draw red overlay on disconnect state */
 	if !self.streamActive {
@@ -135,24 +147,30 @@ func (self *SecuritySystemWidget) Render() {
 
 func (self *SecuritySystemWidget) processFrame(frame []byte) {
 
-	if len(frame) > 0 {
-		self.frameSync.Lock()
-		defer self.frameSync.Unlock()
+	self.frameSync.Lock()
+	defer self.frameSync.Unlock()
 
-		self.frame = frame
+	self.frame = frame
 
-		/* Create surface */
-		rwops, _ := sdl.RWFromMem(self.frame)
-
-		surface, _ := img.LoadJPGRW(rwops)
-		if self.surface != nil {
-			self.surface.Free()
-		}
-		self.surface = surface
-
-		rwops.Close()
-		rwops.Free()
-
+	/* Create surface */
+	rwops, err1 := sdl.RWFromMem(self.frame)
+	if err1 != nil {
+		log.Printf("error with RWFromMem")
 	}
+	defer rwops.Close()
+
+	/**/
+	if self.surface != nil {
+		self.surface.Free()
+		self.surface = nil
+	}
+
+	//
+
+	surface, err1 := img.LoadJPGRW(rwops)
+	if err1 != nil {
+		panic(err1)
+	}
+	self.surface = surface
 
 }
