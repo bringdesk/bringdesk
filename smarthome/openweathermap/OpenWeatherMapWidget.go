@@ -106,7 +106,7 @@ func (self *OpenWeatherMapWidget) recoverToken() {
 
 }
 
-func (self *OpenWeatherMapWidget) updateData() {
+func (self *OpenWeatherMapWidget) updateData() error {
 
 	mainNetworkManager := ctx.GetNetworkManager()
 	//mainGeolocationManager :=
@@ -116,33 +116,40 @@ func (self *OpenWeatherMapWidget) updateData() {
 	ourLang := "RU"
 
 	/* Step 1. Download response */
-	req, _ := mainNetworkManager.MakeRequest("OpenWeatherMapWidget", "GET", "http://api.openweathermap.org/data/2.5/weather", 15)
+	req, err1 := mainNetworkManager.MakeRequest("OpenWeatherMapWidget", "GET", "http://api.openweathermap.org/data/2.5/weather", 15)
+	if err1 != nil {
+		return err1
+	}
 	req.AddQueryParam("lat", fmt.Sprintf("%f", lat))
 	req.AddQueryParam("lon", fmt.Sprintf("%f", lon))
 	req.AddQueryParam("units", "metric")
 	req.AddQueryParam("lang", ourLang)
 	req.AddQueryParam("appid", self.apiToken)
 
-	resp, _ := mainNetworkManager.Perform(req)
+	resp, err2 := mainNetworkManager.Perform(req)
+	if err2 != nil {
+		return err2
+	}
 	newContent := resp.Bytes()
 
 	/* Step 2. Process error response */
 	var weatherErrorResponse OpenWeatherMapErrorResponse
-	err1 := json.Unmarshal(newContent, &weatherErrorResponse)
-	if err1 != nil {
-		log.Printf("Parse error: err = %#v", err1)
+	err3 := json.Unmarshal(newContent, &weatherErrorResponse)
+	if err3 != nil {
+		return err3
 	}
 	self.error = weatherErrorResponse.Message
 
 	/* Step 2. Parse OpenWeatherMap response */
 	var weatherResponse OpenWeatherMapResponse
-	err2 := json.Unmarshal(newContent, &weatherResponse)
-	if err2 != nil {
-		log.Printf("Parse error: err = %#v", err1)
+	err4 := json.Unmarshal(newContent, &weatherResponse)
+	if err4 != nil {
+		return err4
 	}
 	log.Printf("weatherResponse = %#v", weatherResponse)
 	self.out = fmt.Sprintf("Temp = %.1f (%s)", weatherResponse.Main.Temp, weatherResponse.Name)
 
+	return nil
 }
 
 func (self *OpenWeatherMapWidget) ProcessEvent(e *evt.Event) {

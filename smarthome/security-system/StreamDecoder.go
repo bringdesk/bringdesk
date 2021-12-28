@@ -1,7 +1,6 @@
 package security_system
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -18,11 +17,11 @@ const (
 )
 
 type StreamDecoder struct {
-	stream          bytes.Buffer /* */
-	streamState     StreamState  /* */
-	streamFrameSize int          /* */
-	frameCount      int
-	processFrame    func(frame []byte)
+	stream          *CameraStreamBuffer /* */
+	streamState     StreamState         /* */
+	streamFrameSize int                 /* */
+	frameCount      int                 /* */
+	processFrame    func(frame []byte)  /* */
 }
 
 type ProcessState int
@@ -33,15 +32,21 @@ const (
 	ProcessStateReady   = ProcessState(2)
 )
 
+func NewStreamDecoder() *StreamDecoder {
+	newStreamDecoder := new(StreamDecoder)
+	newStreamDecoder.streamState = StreamStateHeader
+	newStreamDecoder.stream = NewCameraStreamBuffer()
+	return newStreamDecoder
+}
+
 func (self *StreamDecoder) processData() (ProcessState, error) {
 
 	if self.streamState == StreamStateHeader {
 		//--myboundary
 		//Content-Type: image/jpeg
 		//Content-Length: 61775
-		raw, err1 := self.stream.ReadString('\n')
+		raw, err1 := self.stream.ReadLine()
 		if err1 != nil {
-			log.Printf("Read error: err = %#v", err1)
 			return ProcessStatePending, nil
 		}
 		row := strings.Trim(raw, "\r\n")
@@ -101,7 +106,7 @@ func (self *StreamDecoder) processData() (ProcessState, error) {
 		return ProcessStatePending, nil
 
 	} else if self.streamState == StreamStateReset {
-		self.stream.ReadString('\n')
+		self.stream.ReadLine()
 		self.streamState = StreamStateHeader
 		//log.Printf("Total frame count: %d", self.frameCount)
 		return ProcessStateReady, nil
@@ -133,13 +138,10 @@ func (self *StreamDecoder) Decode() error {
 
 func (self *StreamDecoder) Write(chunk []byte) error {
 
-	if self.stream.Len() > 128*1024 {
-		//log.Printf("Camera protocol framing error. No memory.")
-		panic("Camera protocol framing error. No memory.")
+	err1 := self.stream.Write(chunk)
+	if err1 != nil {
+		return err1
 	}
-	self.stream.Write(chunk)
-
-	//log.Printf("Stream new data size = %d", self.stream.Len())
 
 	return nil
 }
@@ -153,10 +155,4 @@ func (self *StreamDecoder) processFrameSave(frame []byte) {
 	}
 	defer stream.Close()
 	stream.Write(frame)
-}
-
-func NewStreamDecoder() *StreamDecoder {
-	newStreamDecoder := new(StreamDecoder)
-	newStreamDecoder.streamState = StreamStateHeader
-	return newStreamDecoder
 }

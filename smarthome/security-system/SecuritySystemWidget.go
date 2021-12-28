@@ -8,7 +8,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -20,22 +19,34 @@ type SecuritySystemWidget struct {
 	widgets.BaseWidget
 	frameSync           sync.Mutex
 	frame               []byte
-	streamActive        bool
 	secureCameraAddress string
 	texture             *sdl.Texture
 	surface             *sdl.Surface
+	cameraStream        *CameraStream
 }
 
 func NewSecuritySystemWidget() *SecuritySystemWidget {
 	newSecuritySystemWidget := new(SecuritySystemWidget)
 	newSecuritySystemWidget.recoverCameraAddress()
+	newSecuritySystemWidget.start()
+	return newSecuritySystemWidget
+}
+
+func (self *SecuritySystemWidget) start() {
 	go func() {
 		for {
-			newSecuritySystemWidget.startStream()
+			self.cameraStream = NewCameraStream()
+			self.cameraStream.SetAddr(self.secureCameraAddress)
+			self.cameraStream.SetProcessFrame(self.processFrame)
+			err1 := self.cameraStream.StartStream()
+			if err1 != nil {
+				log.Printf("Secure widget: err = %#v", err1)
+			}
+			self.cameraStream.Close()
+			/* Wait 10 sec. */
 			time.Sleep(10 * time.Second)
 		}
 	}()
-	return newSecuritySystemWidget
 }
 
 func (self *SecuritySystemWidget) recoverCameraAddress() {
@@ -56,56 +67,6 @@ func (self *SecuritySystemWidget) recoverCameraAddress() {
 		log.Printf("openweathermap error API token reading: err = %#v", err)
 	}
 	self.secureCameraAddress = strings.Trim(string(content), " \r\n\t")
-
-}
-
-func (self *SecuritySystemWidget) startStream() {
-	client := http.Client{
-		Timeout: 5 * time.Minute,
-	}
-	request, err := http.NewRequest("GET", self.secureCameraAddress, nil)
-	request.Header.Add("User-Agent", "FireFox")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	resp, err := client.Do(request)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	/* Check server response */
-	log.Printf("resp = %#v", resp)
-
-	streamDecoder := NewStreamDecoder()
-	streamDecoder.SetProcessFrame(self.processFrame)
-
-	// TODO - check "Content-Type":[]string{"multipart/x-mixed-replace; boundary=--myboundary"}
-
-	window := make([]byte, 16*1024) // Make 8 kB chunk memory
-	self.streamActive = true
-	for {
-
-		size, err1 := resp.Body.Read(window)
-		if err1 != nil {
-			break
-		}
-		//log.Printf("Camera stream RX chunk: size = %d", size)
-
-		err2 := streamDecoder.Write(window[:size])
-		if err2 != nil {
-			break
-		}
-
-		err3 := streamDecoder.Decode()
-		if err3 != nil {
-			break
-		}
-
-	}
-	self.streamActive = false
-	log.Printf("Camers session is complete.")
 
 }
 
@@ -138,7 +99,11 @@ func (self *SecuritySystemWidget) Render() {
 	}
 
 	/* Draw red overlay on disconnect state */
-	if !self.streamActive {
+	var cameraActive bool = false
+	if self.cameraStream != nil {
+		cameraActive = self.cameraStream.IsStreamActive()
+	}
+	if !cameraActive {
 		mainRenderer.SetDrawColor(255, 0, 0, 128)
 		mainRenderer.FillRect(&newRect)
 	}
