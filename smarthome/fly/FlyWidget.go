@@ -1,4 +1,4 @@
-package welcome
+package fly
 
 import (
 	"github.com/bringdesk/bringdesk/ctx"
@@ -8,19 +8,19 @@ import (
 )
 
 type FlyItem struct {
-	posX        float64
-	posY        float64
-	dX          float64
-	dY          float64
+	posX float64
+	posY float64
+	dX   float64
+	dY   float64
 }
 
-type WelcomeWidget struct {
+type FlyWidget struct {
 	widgets.BaseWidget
 	item *FlyItem
 }
 
-func NewWelcomeWidget() *WelcomeWidget {
-	newWelcomeWidget := new(WelcomeWidget)
+func NewFlyWidget() *FlyWidget {
+	newWelcomeWidget := new(FlyWidget)
 
 	newFlyItem := new(FlyItem)
 	newFlyItem.dX = 2.5
@@ -30,10 +30,10 @@ func NewWelcomeWidget() *WelcomeWidget {
 	return newWelcomeWidget
 }
 
-func (self *WelcomeWidget) ProcessEvent(e *evt.Event) {
+func (self *FlyWidget) ProcessEvent(e *evt.Event) {
 }
 
-func (self *WelcomeWidget) SetRect(x int, y int, width int, height int) {
+func (self *FlyWidget) SetRect(x int, y int, width int, height int) {
 	self.BaseWidget.SetRect(x, y, width, height)
 	/* Set start FLY position */
 	newFlyItem := self.item
@@ -41,7 +41,7 @@ func (self *WelcomeWidget) SetRect(x int, y int, width int, height int) {
 	newFlyItem.posY = float64(y + height/2)
 }
 
-func (self *WelcomeWidget) Render() {
+func (self *FlyWidget) Render() {
 
 	self.BaseWidget.Render()
 

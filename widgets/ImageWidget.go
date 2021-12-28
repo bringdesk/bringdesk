@@ -37,6 +37,9 @@ func NewImageWidget(path string) *ImageWidget {
 func (self *ImageWidget) ProcessEvent(e *evt.Event) {
 }
 
+func (self *ImageWidget) SetRect(x int, y int, width int, height int) {
+}
+
 func (self *ImageWidget) Render() {
 
 	mainRect := ctx.GetRect()

@@ -3,15 +3,16 @@ package smarthome
 import (
 	"github.com/bringdesk/bringdesk/ctx"
 	"github.com/bringdesk/bringdesk/evt"
+	"github.com/bringdesk/bringdesk/layout"
 	"github.com/bringdesk/bringdesk/smarthome/bank"
 	"github.com/bringdesk/bringdesk/smarthome/clock"
 	"github.com/bringdesk/bringdesk/smarthome/debug"
+	"github.com/bringdesk/bringdesk/smarthome/fly"
 	"github.com/bringdesk/bringdesk/smarthome/news"
 	"github.com/bringdesk/bringdesk/smarthome/openweathermap"
 	security_system "github.com/bringdesk/bringdesk/smarthome/security-system"
 	"github.com/bringdesk/bringdesk/smarthome/timer"
 	"github.com/bringdesk/bringdesk/smarthome/todoist"
-	"github.com/bringdesk/bringdesk/smarthome/welcome"
 	"github.com/bringdesk/bringdesk/widgets"
 	"log"
 	"path"
@@ -26,9 +27,10 @@ const (
 
 type DashboardWidget struct {
 	widgets.IWidget
-	widget           *widgets.WidgetGroup
-	backgroundWidget widgets.IWidget
-	state            DeskMode
+	widget                 *widgets.WidgetGroup
+	backgroundWidget       widgets.IWidget
+	state                  DeskMode
+	dashboardWidgetFactory *DashboardWidgetFactory
 }
 
 func (self *DashboardWidget) registerWidget(w widgets.IWidget) {
@@ -39,6 +41,7 @@ func NewMainWidget() *DashboardWidget {
 
 	newMainWidget := new(DashboardWidget)
 	newMainWidget.state = DeskModeActive
+	newMainWidget.dashboardWidgetFactory = NewDashboardWidgetFactory()
 
 	/* Initialize skin and backgrounds */
 	mainDir := ctx.GetBaseDir()
@@ -85,44 +88,109 @@ func (self *DashboardWidget) Render() {
 
 func (self *DashboardWidget) initializeCommonWidgets() {
 
-	openweathermapWidget := openweathermap.NewOpenWeatherMapWidget()
-	openweathermapWidget.SetRect(100, 100, 240, 320)
-	self.registerWidget(openweathermapWidget)
+	mainRect := ctx.GetRect()
 
-	welcomeWidget := welcome.NewWelcomeWidget()
-	welcomeWidget.SetRect(100+240+10, 100, 240, 320)
-	self.registerWidget(welcomeWidget)
+	self.initializeComponents()
 
-	newTimerWidget := timer.NewTimerWidget()
-	newTimerWidget.SetRect(100+240+10+240+10, 100, 240, 320)
+	basicLayout := layout.NewBasicGridLayout()
+	basicLayout.SetSize(int(mainRect.W), int(mainRect.H))
+
+	weatherWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("OpenWeatherMapWidget")
+	basicLayout.UpdatePos(0, 0, weatherWidget)
+	self.registerWidget(weatherWidget)
+
+	exampleWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("FlyWidget")
+	basicLayout.UpdatePos(0, 1, exampleWidget)
+	self.registerWidget(exampleWidget)
+
+	newTimerWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("TimerWidget")
+	basicLayout.UpdatePos(0, 2, newTimerWidget)
 	self.registerWidget(newTimerWidget)
 
-	newBankWidget := bank.NewBankWidget()
-	newBankWidget.SetRect(100+240+10+240+10+240+10, 100, 240, 320)
+	newBankWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("BankWidget")
+	basicLayout.UpdatePos(0, 3, newBankWidget)
 	self.registerWidget(newBankWidget)
 
-	clockWidget := clock.NewClockWidget()
-	clockWidget.SetRect(100+240+10+240+10+240+10+240+10, 100, 240, 320)
+	clockWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("ClockWidget")
+	basicLayout.UpdatePos(0, 4, clockWidget)
 	self.registerWidget(clockWidget)
 
 	/* Debug widget */
-	debugWidget := debug.NewDebugWidget()
-	debugWidget.SetRect(100+240+10+240+10+240+10+240+10+240+10, 100, 240, 320)
+	debugWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("DebugWidget")
+	basicLayout.UpdatePos(0, 5, debugWidget)
 	self.registerWidget(debugWidget)
 
 	/* Todoist Widget */
-	todoistWidget := todoist.NewTodoistWidget()
-	todoistWidget.SetRect(100, 100+320+10, 240+10+240+10+240, 320)
+	todoistWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("TodoistWidget")
+	basicLayout.UpdatePos(1, 0, todoistWidget)
 	self.registerWidget(todoistWidget)
 
 	/* Secure camera */
-	secureCameraWidget := security_system.NewSecuritySystemWidget()
-	secureCameraWidget.SetRect(100+240+10+240+10+240+10, 100+320+10, 240+10+240+10+240, 320)
+	secureCameraWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("SecuritySystemWidget")
+	basicLayout.UpdatePos(1, 1, secureCameraWidget)
 	self.registerWidget(secureCameraWidget)
 
 	/* News widget */
-	newsWidget := news.NewNewsWidget()
-	newsWidget.SetRect(100, 100+320+10+320+10, 240+10+240+10+240+10+240+10+240+10+240, 320)
+	newsWidget, _ := self.dashboardWidgetFactory.CreateWidgetByName("NewsWidget")
+	basicLayout.UpdatePos(2, 0, newsWidget)
 	self.registerWidget(newsWidget)
 
+}
+
+func (self *DashboardWidget) initializeComponents() {
+	/* Step 1. */
+	self.dashboardWidgetFactory.RegisterWidget(
+		"OpenWeatherMapWidget",
+		func() widgets.IWidget {
+			return openweathermap.NewOpenWeatherMapWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"FlyWidget",
+		func() widgets.IWidget {
+			return fly.NewFlyWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"TimerWidget",
+		func() widgets.IWidget {
+			return timer.NewTimerWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"BankWidget",
+		func() widgets.IWidget {
+			return bank.NewBankWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"ClockWidget",
+		func() widgets.IWidget {
+			return clock.NewClockWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"DebugWidget",
+		func() widgets.IWidget {
+			return debug.NewDebugWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"TodoistWidget",
+		func() widgets.IWidget {
+			return todoist.NewTodoistWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"SecuritySystemWidget",
+		func() widgets.IWidget {
+			return security_system.NewSecuritySystemWidget()
+		},
+	)
+	self.dashboardWidgetFactory.RegisterWidget(
+		"NewsWidget",
+		func() widgets.IWidget {
+			return news.NewNewsWidget()
+		},
+	)
 }
