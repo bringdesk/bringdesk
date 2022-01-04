@@ -110,34 +110,29 @@ func (self *NewsWidget) updateData() {
 	log.Printf("NewsWidget: Update RSS news...")
 	/* Step 1. Get RSS news */
 	mainNetworkManager := ctx.GetNetworkManager()
-	req, _ := mainNetworkManager.MakeRequest("NewsWidget", "GET", "http://tass.ru/rss/v2.xml", 15)
-	resp, _ := mainNetworkManager.Perform(req)
+	req, err1 := mainNetworkManager.MakeRequest("NewsWidget", "GET", "http://tass.ru/rss/v2.xml", 15)
+	if err1 != nil {
+		log.Printf("err = %#v", err1)
+		return
+	}
+
+	resp, err2 := mainNetworkManager.Perform(req)
+	if err2 != nil {
+		log.Printf("err = %#v", err2)
+		return
+	}
+
 	/* Step 2. Parse RSS news */
 	out := resp.Bytes()
 	var rssAtom RSSAtom
-	err2 := xml.Unmarshal(out, &rssAtom)
-	if err2 != nil {
-		log.Printf("err = %#v", err2)
+	err3 := xml.Unmarshal(out, &rssAtom)
+	if err3 != nil {
+		log.Printf("err = %#v", err3)
+		return
 	}
 
 	/* Step 2. Populate news */
-	self.news = nil
-	for _, c := range rssAtom.Channel {
-		for _, i := range c.Items {
-			newNews := new(NewsItem)
-			newNews.pubDate = time.Now()
-			newNews.summary = fmt.Sprintf("%s - %s", i.PubDate, i.Title)
-			self.news = append(self.news, newNews)
-			//
-			if len(self.news) > 15 {
-				break
-			}
-		}
-	}
-
-	/* Step 3. Sort result news */
-	// TODO - sort news ...
-	//sort.Sort(ByPubDate(c.Items))
+	self.populateNews(&rssAtom)
 
 }
 
@@ -159,4 +154,20 @@ func (self *NewsWidget) Render() {
 		newText.Destroy()
 	}
 
+}
+
+func (self *NewsWidget) populateNews(rssAtom *RSSAtom) {
+	self.news = nil
+	for _, c := range rssAtom.Channel {
+		for _, i := range c.Items {
+			newNews := new(NewsItem)
+			newNews.pubDate = time.Now()
+			newNews.summary = fmt.Sprintf("%s - %s", i.PubDate, i.Title)
+			self.news = append(self.news, newNews)
+			//
+			if len(self.news) > 15 {
+				break
+			}
+		}
+	}
 }

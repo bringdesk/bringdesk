@@ -84,10 +84,9 @@ func (self *NetworkManager) Perform(networkRequest *NetworkRequest) (*NetworkRes
 		Timeout: 15 * time.Second,
 	}
 
-	resp, err := client.Do(networkRequest.req)
-	if err != nil {
-		log.Printf("HTTP error: err = %#v", err)
-		return nil, err
+	resp, err1 := client.Do(networkRequest.req)
+	if err1 != nil {
+		return nil, err1
 	}
 	defer resp.Body.Close()
 

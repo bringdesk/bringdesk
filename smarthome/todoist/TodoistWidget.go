@@ -42,8 +42,8 @@ type Task struct {
 
 type TodoistWidget struct {
 	widgets.BaseWidget
-	apiToken string /* Todoist API token                 */
-	tasks    []*Task
+	apiToken string  /* Todoist API token                 */
+	tasks    []*Task /* Output tasks                      */
 }
 
 func NewTodoistWidget() *TodoistWidget {
@@ -81,38 +81,41 @@ func (self *TodoistWidget) recoverToken() {
 
 func (self *TodoistWidget) updateData() {
 	log.Printf("Todoist update start: apiToekn = %#v", self.apiToken)
-	if self.apiToken != "" {
-		mainNetworkManager := ctx.GetNetworkManager()
-
-		/* Step 1. Create new request */
-		req, _ := mainNetworkManager.MakeRequest("TodoistWidget", "GET", "https://api.todoist.com/rest/v1/tasks", 15)
-		newAuthorization := fmt.Sprintf("Bearer %s", self.apiToken)
-		req.AddHeader("Authorization", newAuthorization)
-
-		/* Step 2. Perform request */
-		resp, _ := mainNetworkManager.Perform(req)
-		defer resp.Close()
-
-		/* Step 2. Processing TASK */
-		var tasks []TodoistTask
-		out := resp.Bytes()
-		err3 := json.Unmarshal(out, &tasks)
-		if err3 != nil {
-			log.Printf("Unable parser Task issues")
-		}
-		/* Step 3. Convert issue to local struct */
-		log.Printf("tasks = %#v", tasks)
-		self.tasks = nil
-		for _, t := range tasks {
-			if t.Completed == false {
-				newTask := &Task{
-					content: t.Content,
-				}
-				self.tasks = append(self.tasks, newTask)
-			}
-		}
-
+	if self.apiToken == "" {
+		log.Printf("No API token. Skip update.")
+		return
 	}
+	mainNetworkManager := ctx.GetNetworkManager()
+
+	/* Step 1. Create new request */
+	req, err1 := mainNetworkManager.MakeRequest("TodoistWidget", "GET", "https://api.todoist.com/rest/v1/tasks", 15)
+	if err1 != nil {
+		log.Printf("err = %#v", err1)
+		return
+	}
+	newAuthorization := fmt.Sprintf("Bearer %s", self.apiToken)
+	req.AddHeader("Authorization", newAuthorization)
+
+	/* Step 2. Perform request */
+	resp, err2 := mainNetworkManager.Perform(req)
+	if err2 != nil {
+		log.Printf("err = %#v", err2)
+		return
+	}
+	defer resp.Close()
+
+	/* Step 2. Processing TASK */
+	var tasks []TodoistTask
+	out := resp.Bytes()
+	err3 := json.Unmarshal(out, &tasks)
+	if err3 != nil {
+		log.Printf("Unable parser Task issues")
+		return
+	}
+
+	/* Step 3. Convert issue to local struct */
+	self.performTask(tasks)
+
 }
 
 func (self *TodoistWidget) ProcessEvent(e *evt.Event) {
@@ -130,4 +133,19 @@ func (self *TodoistWidget) Render() {
 		newText.Destroy()
 	}
 
+}
+
+func (self *TodoistWidget) performTask(tasks []TodoistTask) {
+
+	log.Printf("tasks = %#v", tasks)
+
+	self.tasks = nil
+	for _, t := range tasks {
+		if t.Completed == false {
+			newTask := &Task{
+				content: t.Content,
+			}
+			self.tasks = append(self.tasks, newTask)
+		}
+	}
 }

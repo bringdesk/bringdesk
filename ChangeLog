@@ -1,0 +1,11 @@
+BringDesk - 2022-01-04 - Version 0.3.0
+
+ - Add audio notifications
+ - Add weatcher widget
+ - Add currency bank rate (CBR) widget
+ - Add timer widget
+ - Add Skin support (background image)
+ - Add resources directory
+ - Add TouchScreen support
+ - Add resource manager
+ - Add secure camera widget
